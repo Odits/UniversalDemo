@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1002</width>
+    <height>561</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Universal Demo</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTextBrowser" name="result">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>230</y>
+      <width>511</width>
+      <height>241</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="MyButton" name="pB_Test1">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>490</y>
+      <width>129</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Test1</string>
+    </property>
+   </widget>
+   <widget class="MyButton" name="pB_Test2">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>490</y>
+      <width>129</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Test2</string>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">buttonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="MyButton" name="pB_Test3">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>490</y>
+      <width>129</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Test3</string>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">buttonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QPlainTextEdit" name="input">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>230</y>
+      <width>411</width>
+      <height>241</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QSplitter" name="splitter_2">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>20</y>
+      <width>421</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="handleWidth">
+     <number>0</number>
+    </property>
+    <widget class="QLineEdit" name="ConfigPath">
+     <property name="text">
+      <string>./TestConfig.ini</string>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="ConfigSeleter">
+     <property name="minimumSize">
+      <size>
+       <width>111</width>
+       <height>21</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>111</width>
+       <height>21</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>选择调用配置文件</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QSplitter" name="splitter">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>20</y>
+      <width>421</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="handleWidth">
+     <number>0</number>
+    </property>
+    <widget class="QLineEdit" name="LibraryPath">
+     <property name="text">
+      <string>./libTestLiber.dll</string>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="LibrartSeleter">
+     <property name="minimumSize">
+      <size>
+       <width>71</width>
+       <height>21</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>71</width>
+       <height>21</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>选择动态库</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="gridLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>50</y>
+      <width>951</width>
+      <height>171</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="pB_LOAD">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>121</width>
+         <height>31</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>导入</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1002</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="Library">
+    <property name="title">
+     <string>动态库</string>
+    </property>
+    <addaction name="SeleteLibrary"/>
+    <addaction name="Close"/>
+   </widget>
+   <widget class="QMenu" name="Config">
+    <property name="title">
+     <string>配置文件</string>
+    </property>
+    <addaction name="SeleteConfig"/>
+    <addaction name="Save"/>
+    <addaction name="Resave"/>
+   </widget>
+   <addaction name="Library"/>
+   <addaction name="Config"/>
+  </widget>
+  <action name="SeleteLibrary">
+   <property name="text">
+    <string>选择动态库</string>
+   </property>
+  </action>
+  <action name="Save">
+   <property name="text">
+    <string>保存</string>
+   </property>
+  </action>
+  <action name="Resave">
+   <property name="text">
+    <string>另存为</string>
+   </property>
+  </action>
+  <action name="Close">
+   <property name="text">
+    <string>关闭动态库</string>
+   </property>
+  </action>
+  <action name="SeleteConfig">
+   <property name="text">
+    <string>选择配置文件</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MyButton</class>
+   <extends>QPushButton</extends>
+   <header location="global">mybutton.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>SeleteLibrary</sender>
+   <signal>triggered()</signal>
+   <receiver>LibrartSeleter</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>415</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SeleteConfig</sender>
+   <signal>triggered()</signal>
+   <receiver>ConfigSeleter</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>865</x>
+     <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>865</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
+</ui>
