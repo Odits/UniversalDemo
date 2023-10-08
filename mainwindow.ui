@@ -14,175 +14,125 @@
    <string>Universal Demo</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTextBrowser" name="result">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>230</y>
-      <width>511</width>
-      <height>241</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pB_Test1">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>490</y>
-      <width>129</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Test1</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pB_Test2">
-    <property name="geometry">
-     <rect>
-      <x>180</x>
-      <y>490</y>
-      <width>129</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Test2</string>
-    </property>
-    <attribute name="buttonGroup">
-     <string notr="true">buttonGroup</string>
-    </attribute>
-   </widget>
-   <widget class="QPushButton" name="pB_Test3">
-    <property name="geometry">
-     <rect>
-      <x>340</x>
-      <y>490</y>
-      <width>129</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Test3</string>
-    </property>
-    <attribute name="buttonGroup">
-     <string notr="true">buttonGroup</string>
-    </attribute>
-   </widget>
-   <widget class="QPlainTextEdit" name="input">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>230</y>
-      <width>411</width>
-      <height>241</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QSplitter" name="splitter_2">
-    <property name="geometry">
-     <rect>
-      <x>500</x>
-      <y>20</y>
-      <width>421</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="handleWidth">
-     <number>0</number>
-    </property>
-    <widget class="QLineEdit" name="ConfigPath">
-     <property name="text">
-      <string>./TestConfig.ini</string>
-     </property>
-    </widget>
-    <widget class="QToolButton" name="ConfigSeleter">
-     <property name="minimumSize">
-      <size>
-       <width>111</width>
-       <height>21</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>111</width>
-       <height>21</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>选择调用配置文件</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QSplitter" name="splitter">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>20</y>
-      <width>421</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="handleWidth">
-     <number>0</number>
-    </property>
-    <widget class="QLineEdit" name="LibraryPath">
-     <property name="text">
-      <string>./libTestLiber.dll</string>
-     </property>
-    </widget>
-    <widget class="QToolButton" name="LibrartSeleter">
-     <property name="minimumSize">
-      <size>
-       <width>71</width>
-       <height>21</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>71</width>
-       <height>21</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>选择动态库</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="gridLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>50</y>
-      <width>951</width>
-      <height>171</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QPushButton" name="pB_LOAD">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>121</width>
-         <height>31</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>导入</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>15</number>
+        </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetFixedSize</enum>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_1">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="LibraryPath">
+            <property name="text">
+             <string>./libTestLiber.dll</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="LibrarySeleter">
+            <property name="text">
+             <string>选择动态库</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="ConfigPath">
+            <property name="text">
+             <string>./TestConfig.ini</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="ConfigSeleter">
+            <property name="text">
+             <string>选择调用配置文件</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,2">
+        <item>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="pB_LOAD">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>121</width>
+              <height>31</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>导入</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="handleWidth">
+           <number>10</number>
+          </property>
+          <widget class="QPlainTextEdit" name="input"/>
+          <widget class="QTextBrowser" name="result"/>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="1">
+         <widget class="QPushButton" name="pB_Test2">
+          <property name="text">
+           <string>Test2</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="pB_Test3">
+          <property name="text">
+           <string>Test3</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="pB_Test1">
+          <property name="text">
+           <string>Test1</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -190,7 +140,7 @@
      <x>0</x>
      <y>0</y>
      <width>1002</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="Library">
@@ -238,40 +188,7 @@
   </action>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>SeleteLibrary</sender>
-   <signal>triggered()</signal>
-   <receiver>LibrartSeleter</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>415</x>
-     <y>52</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>SeleteConfig</sender>
-   <signal>triggered()</signal>
-   <receiver>ConfigSeleter</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>865</x>
-     <y>52</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup"/>
  </buttongroups>

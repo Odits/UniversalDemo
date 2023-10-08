@@ -1,0 +1,37 @@
+{
+	"example":{
+		"declar":"",
+		"params":[
+			{"arg1":""},
+			{"arg2":""}
+		]
+	}
+	,
+	"testFunc1":{
+		"declar":"i_F_i_i",
+		"params":[
+			{"arg1":"33"},
+			{"arg2":"66"}
+		]
+	}
+	,
+	"testFunc2":{
+		"declar":"i_F_i_pc_i",
+		"params":[
+			{"arg1":"22"},
+			{"arg2":"OUT"},
+			{"arg3":"55"}
+		]
+	}
+	,
+	"testFunc3":{
+		"declar":"v_F_i_str",
+		"params":[
+			{"arg1":"11"},
+			{"arg2":"test"}
+		]
+	}
+
+			
+	
+}
