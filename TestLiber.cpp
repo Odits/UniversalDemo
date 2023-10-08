@@ -36,3 +36,34 @@ void testFunc3(int a1, char* a2)
 
     std::cout << "a1=" << a1 << ", a2=" << a2 << std::endl;
 }
+
+
+int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout)
+{
+    std::cout << "Enter " << __func__ << std::endl;
+
+    std::cout << "args=" << args << std::endl;
+    std::cout << "readTimeout=" << readTimeout << ", writeTimeout=" << writeTimeout << std::endl;
+
+
+    strcpy(resmsg, "success");
+    strcpy(errmsg, "no error");
+
+    return readTimeout + writeTimeout;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

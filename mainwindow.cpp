@@ -34,10 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    QObject::connect(ui->pB_Test1, &MyButton::rightClicked, [&](QString text){
-            ui->input->appendPlainText(text);}
-    );
-
     QObject::connect(ui->Close, &QAction::triggered, [&](){
             ui->input->clear();
             ui->result->clear();
@@ -73,11 +69,53 @@ MainWindow::~MainWindow()
         lib = nullptr;
     }
 }
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QVariantMap>
+
+QVariantMap readJsonFile(const QString& filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QVariantMap();
+    }
+
+    QByteArray jsonData = file.readAll();
+    file.close();
+
+    QJsonDocument document = QJsonDocument::fromJson(jsonData);
+    if (document.isNull() || !document.isObject()) {
+        return QVariantMap();
+    }
+
+    return document.object().toVariantMap();
+}
+#include <QJsonDocument>
+#include <QJsonObject>
+
+QString printJson(const QVariantMap& map)
+{
+    QJsonObject object = QJsonObject::fromVariantMap(map);
+    QJsonDocument document(object);
+    return QString(document.toJson(QJsonDocument::Indented));
+}
 
 
 void MainWindow::on_pB_LOAD_clicked()
 {
     lib = new DynamicLib(ui->LibraryPath->text().toStdString());
+
+//    QVariantMap configs = readJsonFile(ui->ConfigPath->text());
+//    if (configs.empty())
+//    {
+//        ui->result->setText("配置文件错误");
+//        return;
+//    }
+//    for (auto &config : configs)
+//    {
+
+//    }
 
     QSettings settings(ui->ConfigPath->text(), QSettings::IniFormat);
 
@@ -89,11 +127,7 @@ void MainWindow::on_pB_LOAD_clicked()
         auto funcDef = key.split('/');
         funcList.push_back(std::make_tuple(funcDef[0], funcDef[1], value.toString()));
     }
-/*
-i_F_i_i/testFunc1:33,66
-i_F_i_pc_i/testFunc2:22,OUT,55
-v_F_i_pc/testFunc3:11,test
-*/
+
 
     ui->pB_LOAD->hide();
 
@@ -201,7 +235,20 @@ void MainWindow::on_pB_Test2_clicked()
 
 void MainWindow::on_pB_Test3_clicked()
 {
+    lib = new DynamicLib(ui->LibraryPath->text().toStdString());
 
+    QVariantMap configs = readJsonFile(ui->ConfigPath->text());
+    if (configs.empty())
+    {
+        ui->result->setText("配置文件错误");
+        return;
+    }
+    ui->result->append(printJson(configs));
+    for (auto &config : configs)
+    {
+        ui->result->append("config:");
+        ui->result->append(config.toString());
+    }
 }
 
 
