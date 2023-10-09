@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/test">
-        <file>config.ini</file>
-    </qresource>
-</RCC>

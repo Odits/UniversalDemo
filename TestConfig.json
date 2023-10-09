@@ -9,6 +9,15 @@
 		"params": [11, "test"]
 	},
 	"int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);": {
-		"params": [33, "66"]
-	}
+		"params": [{}, [1024], [128], 15, 15]
+	},
+
+	"jsonTest": [
+		"int",
+		{"char *args": {}},
+		{"char *resmsg": [1024]},
+		{"char *errmsg": [128]},
+		{"int readTimeout": 15},
+		{"int writeTimeout": 15}
+	]
 }

@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     QObject::connect(ui->Close, &QAction::triggered, [&](){
-            ui->input->clear();
+            ui->param_inputTable->clear();
             ui->result->clear();
             if (lib)
             {
@@ -90,6 +90,24 @@ QVariantMap readJsonFile(const QString& filePath)
     return document.object().toVariantMap();
 }
 
+QJsonObject readJsonFile1(const QString& filePath)
+{
+	QFile file(filePath);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		return {};
+	}
+
+	QByteArray jsonData = file.readAll();
+	file.close();
+
+	QJsonDocument document = QJsonDocument::fromJson(jsonData);
+	if (document.isNull() || !document.isObject()) {
+		return {};
+	}
+
+	return document.object();
+}
+
 QString printJson(const QVariantMap& map)
 {
     QJsonObject object = QJsonObject::fromVariantMap(map);
@@ -97,6 +115,17 @@ QString printJson(const QVariantMap& map)
     return {document.toJson(QJsonDocument::Indented)};
 }
 
+QString printJson(const QJsonObject& object)
+{
+	QJsonDocument document(object);
+	return {document.toJson(QJsonDocument::Indented)};
+}
+
+QString printJson(const QJsonValueRef& ref)
+{
+	QJsonDocument document(ref.toObject());
+	return {document.toJson(QJsonDocument::Indented)};
+}
 
 void MainWindow::on_pB_LOAD_clicked()
 {
@@ -162,7 +191,7 @@ void MainWindow::on_pB_LOAD_clicked()
         });
         QObject::connect(newPB, &MyButton::rightClicked, [&](const QString& funcName){
             size_t index = funcMap[funcName];
-            ui->input->appendPlainText(get_funcArgs(funcList[index]));
+//            ui->input->appendPlainText(get_funcArgs(funcList[index]));
         });
     }
 }
@@ -193,7 +222,7 @@ void MainWindow::on_ConfigSelector_clicked()
         this,
         tr("open a Config."),
         "./",
-        tr("Config(*.ini *.json);;All files(*.*)"));
+        tr("Config(*.json);;All files(*.*)"));
 
     if (fileName.isEmpty())
     {
@@ -206,33 +235,126 @@ void MainWindow::on_ConfigSelector_clicked()
 }
 
 
+std::string formatJson(wchar_t *json)
+{
+	int indent = 0;
+
+	std::string formattedJson;
+
+	bool inQuote = false;
+
+	for (int i = 0; json[i]; i++) {
+		if (json[i] == '"')
+		{
+			formattedJson += json[i];
+			inQuote = !inQuote;
+			continue;
+		}
+		if (inQuote)				// ""内的内容不做处理
+		{
+			formattedJson += json[i];
+			continue;
+		}
+
+
+		if (json[i] == ' ' || json[i] == '\n' || json[i] == '\r' || json[i] == '\t') {
+			continue;
+		}
+		else if (json[i] == '{' || json[i] == '[') {
+			if (json[i + 1] == '}')
+			{
+				formattedJson += "{}";
+				i++;
+				continue;
+			}
+			formattedJson += json[i];
+			formattedJson += "\r\n";
+			indent++;
+			for (int j = 0; j < indent; j++) {
+				formattedJson += "\t";
+			}
+		}
+		else if (json[i] == '}' || json[i] == ']') {
+			formattedJson += "\r\n";
+			indent--;
+			for (int j = 0; j < indent; j++) {
+				formattedJson += "\t";
+			}
+			formattedJson += json[i];
+		}
+		else if (json[i] == ',') {
+			formattedJson += json[i];
+			formattedJson += "\r\n";
+			for (int j = 0; j < indent; j++) {
+				formattedJson += "\t";
+			}
+		}
+		else {
+			formattedJson += json[i];
+		}
+	}
+
+	return formattedJson;
+}
+
+
+void JSON_parsing(const QString &func_declare, const QJsonValueRef &params)
+{
+
+
+}
+
+
 void MainWindow::on_pB_Test1_clicked()
 {
-    ui->result->append("1234556");
+	QJsonObject configs = readJsonFile1(ui->ConfigPath->text());
+	if (configs.empty())
+	{
+		ui->result->setText("配置文件错误");
+		return;
+	}
+	ui->result->append(printJson(configs));
+	for (const auto& key : configs.keys())
+	{
+		ui->result->append(key + ":" + printJson(configs[key]));
+	}
+	for (auto config : configs)
+	{
 
-//    QStringList def = funcList[0].split('/');
-//    QStringList args = argsList[0].split(',');
+	}
 
-//    DynamicLib lib("./libTestLibrary.dll");
-//    void* func = lib.loadFunc<void*>(def[1].toStdString().c_str());
-//    callFunc(def[0], func, args);
+
+}
+
+void test(QTableWidget *func)
+{
+    func->clear();
+
+    func->setRowCount(5);
+    func->setColumnCount(1);
+
+    QTableWidgetItem *func_name = new QTableWidgetItem("func_name");
+    func->setHorizontalHeaderItem(0, func_name);
+
+    QStringList func_params;
+    func_params << "args 1" << "args 2" << "args 3" << "args 4";
+
+    func->setVerticalHeaderLabels(func_params);
+
+    return;
 }
 
 
 void MainWindow::on_pB_Test2_clicked()
 {
-    DynamicLib lib1("./libTestLibrary.dll");
-    auto func = lib1.loadFunc<i_F_i_i>("testFunc1");
-    if (func)
-        func(2, 3);
-    else
-        ui->input->appendPlainText(lib1.getErrorMsg().c_str());
+    test(ui->param_inputTable);
 }
 
 void MainWindow::on_pB_Test3_clicked()
 {
     lib = new DynamicLib(ui->LibraryPath->text().toStdString());
 
+	//
     QVariantMap configs = readJsonFile(ui->ConfigPath->text());
     if (configs.empty())
     {
@@ -240,11 +362,11 @@ void MainWindow::on_pB_Test3_clicked()
         return;
     }
     ui->result->append(printJson(configs));
-    for (auto &config : configs)
-    {
-        ui->result->append("config:");
-        ui->result->append(config.toString());
-    }
-}//JSON-parsing
+	for (const auto& key : configs.keys())
+	{
+		ui->result->append(key + ":" + printJson(configs[key].toJsonObject().toVariantMap()));
+	}
+
+}
 
 

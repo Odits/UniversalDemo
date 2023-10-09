@@ -54,7 +54,7 @@
           <item>
            <widget class="QLineEdit" name="ConfigPath">
             <property name="text">
-             <string>./TestConfig.ini</string>
+             <string>../TestConfig.json</string>
             </property>
            </widget>
           </item>
@@ -99,7 +99,7 @@
           <property name="handleWidth">
            <number>10</number>
           </property>
-          <widget class="QPlainTextEdit" name="input"/>
+          <widget class="QTableWidget" name="param_inputTable"/>
           <widget class="QTextBrowser" name="result"/>
          </widget>
         </item>

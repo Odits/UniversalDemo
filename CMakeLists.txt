@@ -21,7 +21,6 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
         MyButton.h
-        func_args.qrc
         DynamicLib.h
         FuncPtr.h
 )
