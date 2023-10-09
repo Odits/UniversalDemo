@@ -29,5 +29,5 @@ set(PROJECT_SOURCES
 add_executable(UniversalDemo ${PROJECT_SOURCES})
 target_link_libraries(UniversalDemo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
-add_library(TestLiber SHARED TestLiber.h TestLiber.cpp)
+add_library(TestLibrary SHARED TestLibrary/TestLibrary.h TestLibrary/TestLibrary.cpp)
 #target_link_libraries(TestLiber)

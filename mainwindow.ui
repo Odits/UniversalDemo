@@ -14,7 +14,7 @@
    <string>Universal Demo</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_3">
+   <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -33,12 +33,12 @@
           <item>
            <widget class="QLineEdit" name="LibraryPath">
             <property name="text">
-             <string>./libTestLiber.dll</string>
+             <string>./libTestLibrary.dll</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="LibrarySeleter">
+           <widget class="QToolButton" name="LibrarySelector">
             <property name="text">
              <string>选择动态库</string>
             </property>
@@ -59,7 +59,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="ConfigSeleter">
+           <widget class="QToolButton" name="ConfigSelector">
             <property name="text">
              <string>选择调用配置文件</string>
             </property>
@@ -70,27 +70,27 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,2">
-        <item>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0">
-           <widget class="QPushButton" name="pB_LOAD">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>121</width>
-              <height>31</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>导入</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="pB_LOAD">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>121</width>
+            <height>31</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>导入</string>
+          </property>
+         </widget>
         </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
         <item>
          <widget class="QSplitter" name="splitter">
           <property name="orientation">
@@ -106,7 +106,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QGridLayout" name="gridLayout">
+       <layout class="QGridLayout" name="test_gridLayout">
         <item row="0" column="1">
          <widget class="QPushButton" name="pB_Test2">
           <property name="text">
@@ -189,7 +189,4 @@
  </widget>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
- </buttongroups>
 </ui>

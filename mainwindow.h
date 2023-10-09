@@ -24,9 +24,9 @@ private slots:
 
     void on_pB_LOAD_clicked();
 
-    void on_LibrartSeleter_clicked();
+    void on_LibrarySelector_clicked();
 
-    void on_ConfigSeleter_clicked();
+    void on_ConfigSelector_clicked();
 
 private:
     Ui::MainWindow *ui;

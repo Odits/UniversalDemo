@@ -1,37 +1,14 @@
 {
-	"example":{
-		"declar":"",
-		"params":[
-			{"arg1":""},
-			{"arg2":""}
-		]
+	"int testFunc1(int a1, int a2);": {
+		"params": [33, "66"]
+	},
+	"int testFunc2(int a1, char* a2, int a3);": {
+		"params": ["22", "OUT", "55"]
+	},
+	"void testFunc3(int a1, char* a2);": {
+		"params": [11, "test"]
+	},
+	"int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);": {
+		"params": [33, "66"]
 	}
-	,
-	"testFunc1":{
-		"declar":"i_F_i_i",
-		"params":[
-			{"arg1":"33"},
-			{"arg2":"66"}
-		]
-	}
-	,
-	"testFunc2":{
-		"declar":"i_F_i_pc_i",
-		"params":[
-			{"arg1":"22"},
-			{"arg2":"OUT"},
-			{"arg3":"55"}
-		]
-	}
-	,
-	"testFunc3":{
-		"declar":"v_F_i_str",
-		"params":[
-			{"arg1":"11"},
-			{"arg2":"test"}
-		]
-	}
-
-			
-	
 }

@@ -2,9 +2,7 @@
 #include "./ui_mainwindow.h"
 
 #include <map>
-#include <string>
 #include <vector>
-#include <QPlainTextEdit>
 #include <QTextStream>
 #include <QSettings>
 #include <QDebug>
@@ -48,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
 
             for (int i{ui->gridLayout->count()}; i > 1; i--)
             {
-                MyButton* button = qobject_cast<MyButton*>(ui->gridLayout->itemAt(i-1)->widget());
+                auto* button = qobject_cast<MyButton*>(ui->gridLayout->itemAt(i-1)->widget());
 
                 ui->gridLayout->removeWidget(button);
                 button->hide();
@@ -78,7 +76,7 @@ QVariantMap readJsonFile(const QString& filePath)
 {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        return QVariantMap();
+        return {};
     }
 
     QByteArray jsonData = file.readAll();
@@ -86,19 +84,17 @@ QVariantMap readJsonFile(const QString& filePath)
 
     QJsonDocument document = QJsonDocument::fromJson(jsonData);
     if (document.isNull() || !document.isObject()) {
-        return QVariantMap();
+        return {};
     }
 
     return document.object().toVariantMap();
 }
-#include <QJsonDocument>
-#include <QJsonObject>
 
 QString printJson(const QVariantMap& map)
 {
     QJsonObject object = QJsonObject::fromVariantMap(map);
     QJsonDocument document(object);
-    return QString(document.toJson(QJsonDocument::Indented));
+    return {document.toJson(QJsonDocument::Indented)};
 }
 
 
@@ -125,7 +121,7 @@ void MainWindow::on_pB_LOAD_clicked()
         QVariant value = settings.value(key);
         ui->result->append(key+":"+value.toString());
         auto funcDef = key.split('/');
-        funcList.push_back(std::make_tuple(funcDef[0], funcDef[1], value.toString()));
+        funcList.emplace_back(funcDef[0], funcDef[1], value.toString());
     }
 
 
@@ -145,7 +141,7 @@ void MainWindow::on_pB_LOAD_clicked()
         funcMap.insert(std::pair<QString, size_t>(get_funcName(funcList[i]), i));
 
 
-        MyButton *newPB = new MyButton(get_funcName(funcList[i]), this);
+        auto *newPB = new MyButton(get_funcName(funcList[i]), this);
 
         int textWidth = newPB->getTextWidth();
         newPB->setMaximum_Width_Height(textWidth + 20, 21);
@@ -153,18 +149,18 @@ void MainWindow::on_pB_LOAD_clicked()
         ui->gridLayout->addWidget(newPB, 0, i);
 
 
-        QObject::connect(newPB, &MyButton::leftClicked, [&](QString funcName){
+        QObject::connect(newPB, &MyButton::leftClicked, [&](const QString& funcName){
             size_t index = funcMap[funcName];
             QStringList msgList = callFunc(get_funcDef(funcList[index]), funcPtr[index], get_funcArgs(funcList[index]).split(','));
 
             QString msg = "Call " + funcName;
-            for (auto resp : msgList)
+            for (const auto& resp : msgList)
             {
                 msg += " msgList=" + resp;
             }
             ui->result->append(msg);
         });
-        QObject::connect(newPB, &MyButton::rightClicked, [&](QString funcName){
+        QObject::connect(newPB, &MyButton::rightClicked, [&](const QString& funcName){
             size_t index = funcMap[funcName];
             ui->input->appendPlainText(get_funcArgs(funcList[index]));
         });
@@ -173,7 +169,7 @@ void MainWindow::on_pB_LOAD_clicked()
 
 #include <QFileDialog>
 #include <QMessageBox>
-void MainWindow::on_LibrartSeleter_clicked()
+void MainWindow::on_LibrarySelector_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(
         this,
@@ -191,13 +187,13 @@ void MainWindow::on_LibrartSeleter_clicked()
     }
 }
 
-void MainWindow::on_ConfigSeleter_clicked()
+void MainWindow::on_ConfigSelector_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(
         this,
         tr("open a Config."),
         "./",
-        tr("Config(*.ini);;All files(*.*)"));
+        tr("Config(*.ini *.json);;All files(*.*)"));
 
     if (fileName.isEmpty())
     {
@@ -217,7 +213,7 @@ void MainWindow::on_pB_Test1_clicked()
 //    QStringList def = funcList[0].split('/');
 //    QStringList args = argsList[0].split(',');
 
-//    DynamicLib lib("./libTestLiber.dll");
+//    DynamicLib lib("./libTestLibrary.dll");
 //    void* func = lib.loadFunc<void*>(def[1].toStdString().c_str());
 //    callFunc(def[0], func, args);
 }
@@ -225,12 +221,12 @@ void MainWindow::on_pB_Test1_clicked()
 
 void MainWindow::on_pB_Test2_clicked()
 {
-    DynamicLib lib("./libTestLiber.dll");
-    i_F_i_i func = lib.loadFunc<i_F_i_i>("testFunc1");
+    DynamicLib lib1("./libTestLibrary.dll");
+    auto func = lib1.loadFunc<i_F_i_i>("testFunc1");
     if (func)
         func(2, 3);
     else
-        ui->input->appendPlainText(lib.getErrorMsg().c_str());
+        ui->input->appendPlainText(lib1.getErrorMsg().c_str());
 }
 
 void MainWindow::on_pB_Test3_clicked()
@@ -249,6 +245,6 @@ void MainWindow::on_pB_Test3_clicked()
         ui->result->append("config:");
         ui->result->append(config.toString());
     }
-}
+}//JSON-parsing
 
 
