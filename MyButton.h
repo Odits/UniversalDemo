@@ -8,12 +8,126 @@ QT_BEGIN_NAMESPACE
 class MyButton;
 QT_END_NAMESPACE
 
+class func_Data
+{
+private:
+	QString declare, name, typeRef;
+	QStringList argsList, paramList;
+
+	static QString getTypeRef(const QString &type)
+	{
+		const static std::map<QString, QString> typeRef{
+				{"void",       "v"},
+				{"int",        "i"},
+				{"int*",       "pi"},
+				{"char",       "c"},
+				{"char*",      "pc"},
+				{"constchar*", "str"},
+				{"double",     "d"},
+				{"double*",    "pd"}
+		};
+		QString tmp{type};
+		tmp.remove(' ');
+		if (typeRef.count(tmp))
+			return typeRef.at(tmp);
+		else
+			return "";
+	}
+
+	static QString declare_parsing(const QString &func_declare, QString &func_name, QStringList &func_paramList)
+	{
+		QString out;
+
+		int spaceIndex = func_declare.indexOf(" ");
+		if (spaceIndex != -1)
+			out = func_declare.left(spaceIndex) + "_F";
+		else
+			return {};
+
+		int startIndex = func_declare.indexOf("(");
+		int endIndex = func_declare.indexOf(")");
+
+		func_name = func_declare.mid(spaceIndex + 1, startIndex - spaceIndex - 1);
+
+		if (startIndex != -1 && endIndex != -1 && startIndex < endIndex)
+		{
+			QString func_params = func_declare.mid(startIndex + 1, endIndex - startIndex - 1);
+			func_paramList = func_params.split(',');
+		}
+		else
+			return {};
+
+		for (auto &param: func_paramList)
+		{
+			param = param.trimmed();
+			int p = param.indexOf(' ');
+
+			out += "_" + getTypeRef(param.left(p));
+		}
+
+		return out;
+	}
+
+public:
+	func_Data(QString func_declare, const QJsonValue &func_argsList) : declare(std::move(func_declare))
+	{
+		typeRef = declare_parsing(declare, name, paramList);
+
+		for (const auto &arg: func_argsList.toObject()["args"].toArray().toVariantList())
+		{
+			argsList << arg.toString();
+		}
+	}
+
+	const QString &getDeclare() const
+	{
+		return declare;
+	}
+
+	const QString &getName() const
+	{
+		return name;
+	}
+
+	const QStringList &getArgsList() const
+	{
+		return argsList;
+	}
+
+	const QStringList &getParamList() const
+	{
+		return paramList;
+	}
+
+	void display2table(QTableWidget *table)
+	{
+		table->clear();
+
+		table->setRowCount(paramList.size());
+		table->setColumnCount(1);
+
+		table->setHorizontalHeaderItem(0, new QTableWidgetItem(name));
+		table->setVerticalHeaderLabels(paramList);
+
+		for (int i{}; i < argsList.size(); i++)
+			table->setItem(i, 0, new QTableWidgetItem(argsList[i]));
+	}
+
+	static void display2table(func_Data *func, QTableWidget *table)
+	{
+		func->display2table(table);
+	}
+};
+
+
 class MyButton : public QPushButton
 {
     Q_OBJECT
+private:
+	func_Data *func;
 public:
-    MyButton(QWidget *parent = nullptr) : QPushButton(parent) {}
-    MyButton(const QString &text, QWidget *parent = nullptr) : QPushButton(text, parent) {}
+    explicit MyButton(QWidget *parent = nullptr) : QPushButton(parent) {}
+    explicit MyButton(const QString &text, QWidget *parent = nullptr) : QPushButton(text, parent) {}
 
     int getTextWidth()
     {
@@ -28,6 +142,20 @@ public:
         this->setMaximumHeight(height);
     }
 
+	void autoResize()
+	{
+		this->setMaximum_Width_Height(this->getTextWidth() + 20, 21);
+	}
+
+	void initFunc_Data(QString func_declare, const QJsonValue &func_argsList)
+	{
+		func = new func_Data(func_declare, func_argsList);
+	}
+
+	~MyButton() override
+	{
+		delete func;
+	}
 
 signals:
     void leftClicked(QString);

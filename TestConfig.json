@@ -1,23 +1,14 @@
 {
 	"int testFunc1(int a1, int a2);": {
-		"params": [33, "66"]
+		"args": [33, "66"]
 	},
 	"int testFunc2(int a1, char* a2, int a3);": {
-		"params": ["22", "OUT", "55"]
+		"args": ["22", "OUT", "55"]
 	},
 	"void testFunc3(int a1, char* a2);": {
-		"params": [11, "test"]
+		"args": [11, "test"]
 	},
 	"int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);": {
-		"params": [{}, [1024], [128], 15, 15]
-	},
-
-	"jsonTest": [
-		"int",
-		{"char *args": {}},
-		{"char *resmsg": [1024]},
-		{"char *errmsg": [128]},
-		{"int readTimeout": 15},
-		{"int writeTimeout": 15}
-	]
+		"args": [{}, [1024], [128], 15, 15]
+	}
 }
