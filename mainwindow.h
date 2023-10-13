@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QDebug>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -12,8 +13,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow() override;
 
 private slots:
     void on_pB_Test1_clicked();
@@ -30,5 +31,11 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+	bool isMouseNearWindowEdge(const QPoint &mousePos, int titleBarHeight);
+
+protected:
+	int m_iMarginWidth;
+	bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+
 };
 #endif // MAINWINDOW_H

@@ -14,64 +14,79 @@
    <string>Universal Demo</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>15</number>
+      </property>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="library_hLayout">
         <property name="spacing">
-         <number>15</number>
-        </property>
-        <property name="sizeConstraint">
-         <enum>QLayout::SetFixedSize</enum>
+         <number>0</number>
         </property>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_1">
-          <property name="spacing">
-           <number>0</number>
+         <widget class="QLineEdit" name="LibraryPath">
+          <property name="text">
+           <string>./libTestLibrary.dll</string>
           </property>
-          <item>
-           <widget class="QLineEdit" name="LibraryPath">
-            <property name="text">
-             <string>./libTestLibrary.dll</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="LibrarySelector">
-            <property name="text">
-             <string>选择动态库</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <property name="spacing">
-           <number>0</number>
+         <widget class="QToolButton" name="LibrarySelector">
+          <property name="enabled">
+           <bool>true</bool>
           </property>
-          <item>
-           <widget class="QLineEdit" name="ConfigPath">
-            <property name="text">
-             <string>../TestConfig.json</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="ConfigSelector">
-            <property name="text">
-             <string>选择调用配置文件</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>选择动态库</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
+       <layout class="QHBoxLayout" name="config_hLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLineEdit" name="ConfigPath">
+          <property name="text">
+           <string>../TestConfig.json</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="ConfigSelector">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>选择调用配置文件</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="main_vLayout">
+      <item>
+       <layout class="QHBoxLayout" name="load_hLayout">
+        <item>
          <widget class="QPushButton" name="pB_LOAD">
           <property name="enabled">
            <bool>true</bool>
@@ -90,45 +105,41 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
-        <item>
-         <widget class="QSplitter" name="splitter">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="handleWidth">
-           <number>10</number>
-          </property>
-          <widget class="QTableWidget" name="param_inputTable"/>
-          <widget class="QTextBrowser" name="result"/>
-         </widget>
-        </item>
-       </layout>
+       <layout class="QGridLayout" name="funcButton_gLayout"/>
       </item>
       <item>
-       <layout class="QGridLayout" name="test_gridLayout">
-        <item row="0" column="1">
-         <widget class="QPushButton" name="pB_Test2">
-          <property name="text">
-           <string>Test2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QPushButton" name="pB_Test3">
-          <property name="text">
-           <string>Test3</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="pB_Test1">
-          <property name="text">
-           <string>Test1</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QSplitter" name="splitter">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <widget class="QTableWidget" name="param_inputTable"/>
+        <widget class="QTextBrowser" name="result"/>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QGridLayout" name="test_gridLayout">
+      <item row="0" column="1">
+       <widget class="QPushButton" name="pB_Test2">
+        <property name="text">
+         <string>Test2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="pB_Test3">
+        <property name="text">
+         <string>Test3</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QPushButton" name="pB_Test1">
+        <property name="text">
+         <string>Test1</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

@@ -8,7 +8,6 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTextStream>
-#include <QSettings>
 #include <QDebug>
 #include <QTableWidget>
 #include <QJsonArray>
@@ -42,17 +41,19 @@ std::map<QString, size_t> funcMap;
 	"int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);": {
 		"args": [{}, [1024], [128], 15, 15]
 	}
-	func_declare: int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);
-	func_name: jsonTest
-	func_paramList: [char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout]
-	func_argList: [{}, [1024], [128], 15, 15]
-	func_typeRef: i_F_str_pc_pc_i_i
- */
+		func_declare: int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);
+		func_name: jsonTest
+		func_paramList: [char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout]
+		func_argList: [{}, [1024], [128], 15, 15]
+		func_typeRef: i_F_str_pc_pc_i_i
+*/
 
 MainWindow::MainWindow(QWidget *parent)
 		: QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+
+	m_iMarginWidth = 5;
 
 	QObject::connect(ui->Close, &QAction::triggered, [&]() {
 		ui->param_inputTable->clear();
@@ -66,11 +67,11 @@ MainWindow::MainWindow(QWidget *parent)
 		funcPtr.clear();
 		funcMap.clear();
 
-		for (int i{ui->gridLayout->count()}; i > 1; i--)
+		for (int i{ui->funcButton_gLayout->count()}; i > 1; i--)
 		{
-			auto *button = qobject_cast<MyButton *>(ui->gridLayout->itemAt(i - 1)->widget());
+			auto *button = qobject_cast<MyButton *>(ui->funcButton_gLayout->itemAt(i - 1)->widget());
 
-			ui->gridLayout->removeWidget(button);
+			ui->funcButton_gLayout->removeWidget(button);
 			button->hide();
 			delete button;
 		}
@@ -89,6 +90,88 @@ MainWindow::~MainWindow()
 		lib = nullptr;
 	}
 }
+
+
+bool MainWindow::isMouseNearWindowEdge(const QPoint &mousePos, int titleBarHeight)
+{
+	QRect windowRect = this->geometry().adjusted(-m_iMarginWidth, -m_iMarginWidth + titleBarHeight, m_iMarginWidth, m_iMarginWidth);
+	QRect windowRect1 = this->geometry().adjusted(m_iMarginWidth, m_iMarginWidth + titleBarHeight, -m_iMarginWidth, -m_iMarginWidth);
+
+	return windowRect.contains(mousePos) && !windowRect1.contains(mousePos);
+}
+
+#ifdef Q_OS_WIN
+
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+{
+	MSG *msg = static_cast<MSG *>(message);
+
+	switch (msg->message)
+	{
+	case WM_NCHITTEST:
+		// 获取鼠标在屏幕上的位置
+		POINTS points = MAKEPOINTS(msg->lParam);
+		QPoint globalMousePos(points.x, points.y);
+
+		int titleBarHeight = frameGeometry().y() - geometry().y();
+		bool isMouseOnEdge = isMouseNearWindowEdge(globalMousePos, titleBarHeight);
+
+		if (isMouseOnEdge)// 鼠标位于窗口边缘附近
+		{
+			if (msg->wParam == HTBOTTOMRIGHT)// 鼠标左键按下
+			{
+				static int i{0};
+				qDebug() << "MouseOnEdge" << i++;
+			}
+		}
+		break;
+	}
+
+	// 调用默认处理
+	return false;
+}
+
+#else
+
+#include <QCoreApplication>
+#include <QX11Info>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+{
+	Q_UNUSED(eventType);
+
+	if (eventType == "xcb_generic_event_t")
+	{
+		xcb_generic_event_t *xEvent = static_cast<xcb_generic_event_t*>(message);
+		if (xEvent->response_type == XCB_BUTTON_PRESS)
+		{
+			xcb_button_press_event_t *buttonPressEvent = reinterpret_cast<xcb_button_press_event_t*>(xEvent);
+
+			// 获取鼠标按钮号码，1表示左键
+			if (buttonPressEvent->detail == XCB_BUTTON_INDEX_1)
+			{
+				// 获取鼠标位置
+				QPoint globalMousePos(buttonPressEvent->event_x, buttonPressEvent->event_y);
+				int titleBarHeight = frameGeometry().y() - geometry().y();
+				bool isMouseOnEdge = isMouseNearWindowEdge(globalMousePos, titleBarHeight);
+
+				if (isMouseOnEdge)
+				{
+					// 鼠标左键按下，且位于窗口边缘附近
+					static int i{0};
+					qDebug() << "MouseOnEdge" << i++;
+				}
+			}
+		}
+	}
+
+	// 继续处理事件
+	return false;
+}
+#endif
+
 
 QVariantMap readJsonFile(const QString &filePath)
 {
@@ -213,16 +296,16 @@ void MainWindow::on_pB_LOAD_clicked()
 	ui->pB_LOAD->hide();
 
 //	ui->result->append(printJson(configs));
+	int i{0};
 	for (const auto &key: configs.keys())
 	{
 		ui->result->append(key + ":" + printJson(configs[key]));
-		auto *func = new func_Data(key, configs[key]);
 
-		auto *newPB = new MyButton(func->getName(), this);
+		auto *newPB = new MyButton(key, configs[key], this);
 		newPB->autoResize();
-		ui->gridLayout->addWidget(newPB);
+		ui->funcButton_gLayout->addWidget(newPB, 0, i++);
 
-		QObject::connect(newPB, &MyButton::leftClicked, [&](const QString &funcName) {
+		QObject::connect(newPB, &MyButton::leftClicked, [&](const func_Data *func) {
 //			size_t index = funcMap[funcName];
 //			QStringList msgList = callFunc(get_funcDef(funcList[index]), funcPtr[index], get_funcArgs(funcList[index]).split(','));
 //
@@ -233,7 +316,7 @@ void MainWindow::on_pB_LOAD_clicked()
 //			}
 //			ui->result->append(msg);
 		});
-		QObject::connect(newPB, &MyButton::rightClicked, [&](const QString &funcName) {
+		QObject::connect(newPB, &MyButton::rightClicked, [&](const func_Data *func) {
 //			size_t index = funcMap[funcName];
 //			ui->input->appendPlainText(get_funcArgs(funcList[index]));
 
@@ -242,12 +325,11 @@ void MainWindow::on_pB_LOAD_clicked()
 			func->display2table(ui->param_inputTable);
 		});
 
-
 	}
+//	ui->gridLayout->setAlignment(Qt::AlignLeft);
 
 
-
-
+#if 0
 	for (int i{}; i < funcList.size(); i++)
 	{
 		void *func = lib->loadFunc<void *>(get_funcName(funcList[i]).toStdString().c_str());
@@ -259,29 +341,8 @@ void MainWindow::on_pB_LOAD_clicked()
 			continue;
 		}
 		funcMap.insert(std::pair<QString, size_t>(get_funcName(funcList[i]), i));
-
-		auto *newPB = new MyButton(get_funcName(funcList[i]), this);
-		newPB->autoResize();
-		ui->gridLayout->addWidget(newPB);
-
-		QObject::connect(newPB, &MyButton::leftClicked, [&](const QString &funcName) {
-			size_t index = funcMap[funcName];
-			QStringList msgList = callFunc(get_funcDef(funcList[index]), funcPtr[index], get_funcArgs(funcList[index]).split(','));
-
-			QString msg = "Call " + funcName;
-			for (const auto &resp: msgList)
-			{
-				msg += " msgList=" + resp;
-			}
-			ui->result->append(msg);
-		});
-		QObject::connect(newPB, &MyButton::rightClicked, [&](const QString &funcName) {
-			size_t index = funcMap[funcName];
-			func_display2table(ui->param_inputTable, new QTableWidgetItem(funcName), get_funcArgs(funcList[index]).split(','), {});
-
-//			ui->input->appendPlainText(get_funcArgs(funcList[index]));
-		});
 	}
+#endif
 }
 
 std::string formatJson(wchar_t *json)

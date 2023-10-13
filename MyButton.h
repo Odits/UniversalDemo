@@ -1,11 +1,19 @@
 #ifndef MYBUTTON_H
 #define MYBUTTON_H
 
+#include <QTableWidget>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QString>
+
 #include <QPushButton>
 #include <QMouseEvent>
+#include <utility>
 
 QT_BEGIN_NAMESPACE
 class MyButton;
+
 QT_END_NAMESPACE
 
 class func_Data
@@ -99,7 +107,7 @@ public:
 		return paramList;
 	}
 
-	void display2table(QTableWidget *table)
+	void display2table(QTableWidget *table) const
 	{
 		table->clear();
 
@@ -113,7 +121,7 @@ public:
 			table->setItem(i, 0, new QTableWidgetItem(argsList[i]));
 	}
 
-	static void display2table(func_Data *func, QTableWidget *table)
+	static void display2table(const func_Data *func, QTableWidget *table)
 	{
 		func->display2table(table);
 	}
@@ -122,34 +130,52 @@ public:
 
 class MyButton : public QPushButton
 {
-    Q_OBJECT
+Q_OBJECT
 private:
 	func_Data *func;
 public:
-    explicit MyButton(QWidget *parent = nullptr) : QPushButton(parent) {}
-    explicit MyButton(const QString &text, QWidget *parent = nullptr) : QPushButton(text, parent) {}
+	explicit MyButton(QWidget *parent = nullptr) : QPushButton(parent) {}
 
-    int getTextWidth()
-    {
-        // 使用 QFontMetrics 计算文本的宽度
-        QFontMetrics fontMetrics(this->font());
-        return fontMetrics.width(this->text());
-    }
+	explicit MyButton(const QString &text, QWidget *parent = nullptr) : QPushButton(text, parent) {}
 
-    void setMaximum_Width_Height(int width, int height)
-    {
-        this->setMaximumWidth(width);
-        this->setMaximumHeight(height);
-    }
+	explicit MyButton(QString func_declare, const QJsonValue &func_argsList, QWidget *parent = nullptr)
+			: QPushButton(init_func(std::move(func_declare), func_argsList), parent) {}
+
+	int getTextWidth()
+	{
+		// 使用 QFontMetrics 计算文本的宽度
+		QFontMetrics fontMetrics(this->font());
+		return fontMetrics.width(this->text());
+	}
+
+	void setMaximum_Width_Height(int width, int height)
+	{
+		this->setMaximumWidth(width);
+		this->setMaximumHeight(height);
+	}
 
 	void autoResize()
 	{
-		this->setMaximum_Width_Height(this->getTextWidth() + 20, 21);
+		this->setMaximum_Width_Height(this->getTextWidth() + 20, 31);
 	}
 
-	void initFunc_Data(QString func_declare, const QJsonValue &func_argsList)
+	static void autoResize(QPushButton *pb)
 	{
-		func = new func_Data(func_declare, func_argsList);
+		QFontMetrics fontMetrics(pb->font());
+		int width = fontMetrics.width(pb->text());
+
+		pb->setMaximumWidth(width);
+	}
+
+	const QString &init_func(QString func_declare, const QJsonValue &func_argsList)
+	{
+		func = new func_Data(std::move(func_declare), func_argsList);
+		return func->getName();
+	}
+
+	void init_func(func_Data *funcData)
+	{
+		this->func = funcData;
 	}
 
 	~MyButton() override
@@ -158,29 +184,28 @@ public:
 	}
 
 signals:
-    void leftClicked(QString);
-    void rightClicked(QString);
+
+	void leftClicked(func_Data *);
+
+	void rightClicked(func_Data *);
 
 protected:
-    void mousePressEvent(QMouseEvent *event) override
-    {
-        if(event->button() == Qt::RightButton)
-        {
-            emit rightClicked(this->text());
-        }
-        if(event->button() == Qt::LeftButton)
-        {
-            emit leftClicked(this->text());
-        }
-        else
-        {
-            QPushButton::mousePressEvent(event);
-        }
-    }
+	void mousePressEvent(QMouseEvent *event) override
+	{
+		if (event->button() == Qt::RightButton)
+		{
+			emit rightClicked(this->func);
+		}
+		if (event->button() == Qt::LeftButton)
+		{
+			emit leftClicked(this->func);
+		}
+		else
+		{
+			QPushButton::mousePressEvent(event);
+		}
+	}
 };
-
-
-
 
 
 #endif // MYBUTTON_H
