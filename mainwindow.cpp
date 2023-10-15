@@ -53,6 +53,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	ui->setupUi(this);
 
+    ui->listWidget->setViewMode(QListView::IconMode);
+    ui->listWidget->setFlow(QListView::LeftToRight);
+    ui->listWidget->setResizeMode(QListView::Adjust);
+
 	m_iMarginWidth = 5;
 
 	QObject::connect(ui->Close, &QAction::triggered, [&]() {
@@ -303,7 +307,11 @@ void MainWindow::on_pB_LOAD_clicked()
 
 		auto *newPB = new MyButton(key, configs[key], this);
 		newPB->autoResize();
-		ui->funcButton_gLayout->addWidget(newPB, 0, i++);
+//		ui->funcButton_gLayout->addWidget(newPB, 0, i++);
+        QListWidgetItem *item = new QListWidgetItem();
+        item->setSizeHint(newPB->sizeHint());
+        ui->listWidget->addItem(item);
+        ui->listWidget->setItemWidget(item, newPB);
 
 		QObject::connect(newPB, &MyButton::leftClicked, [&](const func_Data *func) {
 //			size_t index = funcMap[funcName];

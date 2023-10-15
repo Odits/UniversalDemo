@@ -156,7 +156,8 @@ public:
 
 	void autoResize()
 	{
-		this->setMaximum_Width_Height(this->getTextWidth() + 20, 31);
+//		this->setMaximum_Width_Height(this->getTextWidth() + 20, 31);
+        this->setSizeIncrement(this->sizeHint());
 	}
 
 	static void autoResize(QPushButton *pb)
