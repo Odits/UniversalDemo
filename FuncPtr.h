@@ -30,25 +30,25 @@ typedef void (*v_F_i_str)(int, const char*);
 
 #define BUF_SIZE 1024
 
-int _i_F_i_i(void *func, int a1, int a2)
+static int _i_F_i_i(void *func, int a1, int a2)
 {
     i_F_i_i Y = (i_F_i_i)func;
     return Y(a1, a2);
 }
 
-int _i_F_i_pc_i(void *func, int a1, char *a2, int a3)
+static int _i_F_i_pc_i(void *func, int a1, char *a2, int a3)
 {
     i_F_i_pc_i Y = (i_F_i_pc_i)func;
     return Y(a1, a2, a3);
 }
 
-void _v_F_i_pc(void *func, int a1, char *a2)
+static void _v_F_i_pc(void *func, int a1, char *a2)
 {
     v_F_i_pc Y = (v_F_i_pc)func;
     Y(a1, a2);
 }
 
-void _v_F_i_str(void *func, int a1, const char *a2)
+static void _v_F_i_str(void *func, int a1, const char *a2)
 {
     v_F_i_str Y = (v_F_i_str)func;
     Y(a1, a2);
@@ -61,7 +61,7 @@ void _v_F_i_str(void *func, int a1, const char *a2)
 #include <QStringList>
 
 
-QStringList callFunc(const QString &type, void* X, const QStringList &args = {})
+static QStringList callFunc(const QString &type, void* X, const QStringList &args = {})
 {
     QStringList msgList;
     if (type == "i_F_i_i")
@@ -91,6 +91,7 @@ QStringList callFunc(const QString &type, void* X, const QStringList &args = {})
     else
     {
         // 处理未知类型或错误情况
+		std::cerr << "error type: " << type.toStdString() << std::endl;
         throw std::runtime_error("Unsupported type");
     }
     return msgList;

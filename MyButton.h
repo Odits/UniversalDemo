@@ -11,6 +11,11 @@
 #include <QMouseEvent>
 #include <utility>
 
+#include <string>
+
+#include "FuncPtr.h"
+#include "DynamicLib.h"
+
 QT_BEGIN_NAMESPACE
 class MyButton;
 
@@ -21,6 +26,7 @@ class func_Data
 private:
 	QString declare, name, typeRef;
 	QStringList argsList, paramList;
+	void *ptr{};
 
 	static QString getTypeRef(const QString &type)
 	{
@@ -48,7 +54,7 @@ private:
 
 		int spaceIndex = func_declare.indexOf(" ");
 		if (spaceIndex != -1)
-			out = func_declare.left(spaceIndex) + "_F";
+			out = getTypeRef(func_declare.left(spaceIndex)) + "_F";
 		else
 			return {};
 
@@ -107,6 +113,11 @@ public:
 		return paramList;
 	}
 
+	const QString &getTypeRef() const
+	{
+		return typeRef;
+	}
+
 	void display2table(QTableWidget *table) const
 	{
 		table->clear();
@@ -125,21 +136,41 @@ public:
 	{
 		func->display2table(table);
 	}
+
+	static QString getTableName(QTableWidget *table)
+	{
+		return table->horizontalHeaderItem(0)->text();
+	}
+
+	void setPtr(void *func_ptr)
+	{
+		this->ptr = func_ptr;
+	}
+
+	QStringList call() const
+	{
+		return callFunc(typeRef, ptr, argsList);
+	}
+
+	static QStringList call(const func_Data *func)
+	{
+		return func->call();
+	}
+
 };
 
 
 class MyButton : public QPushButton
 {
 Q_OBJECT
-private:
 	func_Data *func;
 public:
 	explicit MyButton(QWidget *parent = nullptr) : QPushButton(parent) {}
 
 	explicit MyButton(const QString &text, QWidget *parent = nullptr) : QPushButton(text, parent) {}
 
-	explicit MyButton(QString func_declare, const QJsonValue &func_argsList, QWidget *parent = nullptr)
-			: QPushButton(init_func(std::move(func_declare), func_argsList), parent) {}
+	explicit MyButton(const QString &func_declare, const QJsonValue &func_argsList, QWidget *parent = nullptr)
+			: QPushButton(init_func(func_declare, func_argsList), parent) {}
 
 	int getTextWidth()
 	{
@@ -156,8 +187,8 @@ public:
 
 	void autoResize()
 	{
-//		this->setMaximum_Width_Height(this->getTextWidth() + 20, 31);
-        this->setSizeIncrement(this->sizeHint());
+        this->setMaximum_Width_Height(this->getTextWidth() + 200, 31);
+//		this->setSizeIncrement(this->sizeHint());
 	}
 
 	static void autoResize(QPushButton *pb)
@@ -168,9 +199,9 @@ public:
 		pb->setMaximumWidth(width);
 	}
 
-	const QString &init_func(QString func_declare, const QJsonValue &func_argsList)
+	const QString &init_func(const QString &func_declare, const QJsonValue &func_argsList)
 	{
-		func = new func_Data(std::move(func_declare), func_argsList);
+		func = new func_Data(func_declare, func_argsList);
 		return func->getName();
 	}
 
@@ -179,13 +210,25 @@ public:
 		this->func = funcData;
 	}
 
+	bool func_loadLib(DynamicLib *lib)
+	{
+		QString name = func->getName();
+		void *ptr = lib->loadFunc<void *>(name.toStdString().c_str());
+		if (ptr)
+		{
+			func->setPtr(ptr);
+			return true;
+		}
+		else
+			return false;
+	}
+
 	~MyButton() override
 	{
 		delete func;
 	}
 
 signals:
-
 	void leftClicked(func_Data *);
 
 	void rightClicked(func_Data *);

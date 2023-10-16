@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QDebug>
+#include "flowlayout.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -10,32 +11,35 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() override;
+	explicit MainWindow(QWidget *parent = nullptr);
+
+	~MainWindow() override;
 
 private slots:
-    void on_pB_Test1_clicked();
 
-    void on_pB_Test2_clicked();
+	void on_pB_Test1_clicked();
 
-    void on_pB_Test3_clicked();
+	void on_pB_Test2_clicked();
 
-    void on_pB_LOAD_clicked();
+	void on_pB_Test3_clicked();
 
-    void on_LibrarySelector_clicked();
+	void on_pB_LOAD_clicked();
 
-    void on_ConfigSelector_clicked();
+	void on_LibrarySelector_clicked();
+
+	void on_ConfigSelector_clicked();
+
+	void on_Close_triggered();
 
 private:
-    Ui::MainWindow *ui;
-	bool isMouseNearWindowEdge(const QPoint &mousePos, int titleBarHeight);
+	Ui::MainWindow *ui;
+	FlowLayout *flowLayout;
 
 protected:
 	int m_iMarginWidth;
-	bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
-
 };
+
 #endif // MAINWINDOW_H

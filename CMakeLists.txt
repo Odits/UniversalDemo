@@ -23,6 +23,8 @@ set(PROJECT_SOURCES
         MyButton.h
         DynamicLib.h
         FuncPtr.h
+		flowlayout.cpp
+		flowlayout.h
 )
 
 add_executable(UniversalDemo ${PROJECT_SOURCES})
