@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QString>
+#include <QDebug>
 
 #include <QPushButton>
 #include <QMouseEvent>
@@ -16,10 +17,32 @@
 #include "FuncPtr.h"
 #include "DynamicLib.h"
 
-QT_BEGIN_NAMESPACE
-class MyButton;
+static QString JsonToStr(const QVariantMap &map)
+{
+	QJsonObject object = QJsonObject::fromVariantMap(map);
+	QJsonDocument document(object);
+	return {document.toJson(QJsonDocument::Compact)};
+}
 
-QT_END_NAMESPACE
+static QString JsonArrayToStr(const QVariantList &list)
+{
+	QJsonArray array = QJsonArray::fromVariantList(list);
+	QJsonDocument document(array);
+	return {document.toJson(QJsonDocument::Compact)};
+}
+
+static QString printJson(const QJsonObject &object)
+{
+	QJsonDocument document(object);
+	return {document.toJson(QJsonDocument::Indented)};
+}
+
+static QString printJson(const QJsonValueRef &ref)
+{
+	QJsonDocument document(ref.toObject());
+	return {document.toJson(QJsonDocument::Indented)};
+}
+
 
 class func_Data
 {
@@ -74,9 +97,11 @@ private:
 		for (auto &param: func_paramList)
 		{
 			param = param.trimmed();
-			int p = param.indexOf(' ');
+			int p = param.indexOf('*');
+			if (p == -1)
+				p = param.indexOf(' ');
 
-			out += "_" + getTypeRef(param.left(p));
+			out += "_" + getTypeRef(param.left(p+1));
 		}
 
 		return out;
@@ -89,7 +114,12 @@ public:
 
 		for (const auto &arg: func_argsList.toObject()["args"].toArray().toVariantList())
 		{
-			argsList << arg.toString();
+			if (arg.type() == QVariant::Map)
+				argsList << JsonToStr(arg.toMap());
+			else if (arg.type() == QVariant::List)
+				argsList << JsonArrayToStr(arg.toList());
+			else
+				argsList << arg.toString();
 		}
 	}
 
@@ -157,8 +187,24 @@ public:
 		return func->call();
 	}
 
+	void loadArgs(QTableWidget *table)
+	{
+		if (table->rowCount() == 0 || table->columnCount() == 0)
+			return;
+		if (getTableName(table) == name)
+		{
+			for (int var{}; var < argsList.size(); var++)
+			{
+				argsList[var] = table->item(var, 0)->text();
+			}
+		}
+	}
+
 };
 
+QT_BEGIN_NAMESPACE
+class MyButton;
+QT_END_NAMESPACE
 
 class MyButton : public QPushButton
 {

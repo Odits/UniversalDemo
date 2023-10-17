@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QDebug>
+#include "DynamicLib.h"
 #include "flowlayout.h"
 
 QT_BEGIN_NAMESPACE
@@ -36,10 +37,8 @@ private slots:
 
 private:
 	Ui::MainWindow *ui;
+	DynamicLib *lib{};
 	FlowLayout *flowLayout;
-
-protected:
-	int m_iMarginWidth;
 };
 
 #endif // MAINWINDOW_H

@@ -2,10 +2,10 @@
 	"int testFunc1(int a1, int a2);": {
 		"args": [33, "66"]
 	},
-	"int testFunc2(int a1, char* a2, int a3);": {
+	"int testFunc2(int a1, char *a2, int a3);": {
 		"args": ["22", "OUT", "55"]
 	},
-	"void testFunc3(int a1, char* a2);": {
+	"void testFunc3(int a1, char *a2);": {
 		"args": [11, "test"]
 	},
 	"int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);": {

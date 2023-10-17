@@ -18,7 +18,6 @@ pd = double*
 
 */
 
-
 typedef int (*i_F_i_i)(int, int);
 
 typedef int (*i_F_i_pc_i)(int, char*, int);
@@ -27,33 +26,35 @@ typedef void (*v_F_i_pc)(int, char*);
 
 typedef void (*v_F_i_str)(int, const char*);
 
+typedef int (*i_F_pc_pc_pc_i_i)(char*, char*, char*, int, int);
+
 
 #define BUF_SIZE 1024
 
-static int _i_F_i_i(void *func, int a1, int a2)
+static int i_F_i_i_(void *func, int a1, int a2)
 {
-    i_F_i_i Y = (i_F_i_i)func;
-    return Y(a1, a2);
+    return i_F_i_i(func)(a1, a2);
 }
 
-static int _i_F_i_pc_i(void *func, int a1, char *a2, int a3)
+static int i_F_i_pc_i_(void *func, int a1, char *a2, int a3)
 {
-    i_F_i_pc_i Y = (i_F_i_pc_i)func;
-    return Y(a1, a2, a3);
+    return i_F_i_pc_i(func)(a1, a2, a3);
 }
 
-static void _v_F_i_pc(void *func, int a1, char *a2)
+static void v_F_i_pc_(void *func, int a1, char *a2)
 {
-    v_F_i_pc Y = (v_F_i_pc)func;
-    Y(a1, a2);
+	return v_F_i_pc(func)(a1, a2);
 }
 
-static void _v_F_i_str(void *func, int a1, const char *a2)
+static void v_F_i_str_(void *func, int a1, const char *a2)
 {
-    v_F_i_str Y = (v_F_i_str)func;
-    Y(a1, a2);
+	return v_F_i_str(func)(a1, a2);
 }
 
+static int i_F_pc_pc_pc_i_i_(void *func, char *a1, char *a2, char *a3, int a4, int a5)
+{
+	return i_F_pc_pc_pc_i_i(func)(a1, a2, a3, a4, a5);
+}
 
 #include <iostream>
 #include <string>
@@ -66,14 +67,14 @@ static QStringList callFunc(const QString &type, void* X, const QStringList &arg
     QStringList msgList;
     if (type == "i_F_i_i")
     {
-        int retCode = _i_F_i_i(X, args[0].toInt(), args[1].toInt());
+        int retCode = i_F_i_i_(X, args[0].toInt(), args[1].toInt());
         msgList.push_back(QString::number(retCode));
     }
     else if (type == "i_F_i_pc_i")
     {
         char buf[BUF_SIZE]{};
         strcpy(buf, args[1].toStdString().c_str());
-        int retCode = _i_F_i_pc_i(X, args[0].toInt(), buf, args[2].toInt());
+        int retCode = i_F_i_pc_i_(X, args[0].toInt(), buf, args[2].toInt());
         msgList.push_back(QString::number(retCode));
         msgList.push_back(buf);
     }
@@ -81,13 +82,27 @@ static QStringList callFunc(const QString &type, void* X, const QStringList &arg
     {
         char buf[BUF_SIZE]{};
         strcpy(buf, args[1].toStdString().c_str());
-        _v_F_i_pc(X, args[0].toInt(), buf);
+        v_F_i_pc_(X, args[0].toInt(), buf);
         msgList.push_back(buf);
     }
     else if (type == "v_F_i_str")
     {
-        _v_F_i_str(X, args[0].toInt(), args[1].toStdString().c_str());
+        v_F_i_str_(X, args[0].toInt(), args[1].toStdString().c_str());
     }
+	else if (type == "i_F_pc_pc_pc_i_i")
+	{
+		char a1[BUF_SIZE]{}, a2[BUF_SIZE]{}, a3[BUF_SIZE]{};
+		strcpy(a1, args[0].toStdString().c_str());
+		strcpy(a2, args[1].toStdString().c_str());
+		strcpy(a3, args[3].toStdString().c_str());
+
+		int retCode = i_F_pc_pc_pc_i_i_(X, a1, a2, a3, args[3].toInt(), args[4].toInt());
+
+		msgList.push_back(QString::number(retCode));
+		msgList.push_back(a1);
+		msgList.push_back(a2);
+		msgList.push_back(a3);
+	}
     else
     {
         // 处理未知类型或错误情况

@@ -18,22 +18,7 @@
 #include <QListWidget>
 
 //#include "FuncPtr.h"
-#include "DynamicLib.h"
 #include "MyButton.h"
-
-std::vector<std::tuple<QString, QString, QString>> funcList;
-DynamicLib *lib;
-std::vector<void *> funcPtr;
-std::map<QString, size_t> funcMap;
-
-#define get_funcDef(func) \
-    std::get<0>(func)
-
-#define get_funcName(func) \
-    std::get<1>(func)
-
-#define get_funcArgs(func) \
-    std::get<2>(func)
 
 /*
 	arg——实参（Argument）
@@ -54,9 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	ui->setupUi(this);
 	flowLayout = new FlowLayout();
-    ui->funcButton_gLayout->addLayout(flowLayout, 0, 0);
-
-	m_iMarginWidth = 5;
+	ui->funcButton_gLayout->addLayout(flowLayout, 0, 0);
 
 }
 
@@ -91,38 +74,6 @@ QJsonObject readJsonFile(const QString &filePath)
 	return document.object();
 }
 
-QString printJson(const QVariantMap &map)
-{
-	QJsonObject object = QJsonObject::fromVariantMap(map);
-	QJsonDocument document(object);
-	return {document.toJson(QJsonDocument::Indented)};
-}
-
-QString printJson(const QJsonObject &object)
-{
-	QJsonDocument document(object);
-	return {document.toJson(QJsonDocument::Indented)};
-}
-
-QString printJson(const QJsonValueRef &ref)
-{
-	QJsonDocument document(ref.toObject());
-	return {document.toJson(QJsonDocument::Indented)};
-}
-
-static void func_display2table(QTableWidget *table, QTableWidgetItem *func_name, const QStringList &func_params, const QStringList &func_args)
-{
-	table->clear();
-
-	table->setRowCount(func_params.size());
-	table->setColumnCount(1);
-
-	table->setHorizontalHeaderItem(0, func_name);
-	table->setVerticalHeaderLabels(func_params);
-
-	for (int i{}; i < func_args.size(); i++)
-		table->setItem(i, 0, new QTableWidgetItem(func_args[i]));
-}
 
 
 void MainWindow::on_LibrarySelector_clicked()
@@ -176,7 +127,7 @@ void MainWindow::on_pB_LOAD_clicked()
 //	ui->result->append(printJson(configs));
 	for (const auto &key: configs.keys())
 	{
-		ui->result->append(key + ":" + printJson(configs[key]));
+//		ui->result->append(key + ":" + printJson(configs[key]));
 
 		auto *newPB = new MyButton(key, configs[key], this);
 		newPB->autoResize();
@@ -190,21 +141,25 @@ void MainWindow::on_pB_LOAD_clicked()
 //		ui->funcButton_gLayout->addWidget(newPB, 0, i++);
 		flowLayout->addWidget(newPB);
 
-		QObject::connect(newPB, &MyButton::leftClicked, [&](const func_Data *func) {
-			auto msgList = func->call();
+		QObject::connect(newPB, &MyButton::leftClicked, [&](func_Data *func) {
 			QString msg = "Call " + func->getName();
-			for (const auto &resp: msgList)
+			try
 			{
-				msg += " msgList=" + resp;
+				func->loadArgs(ui->param_inputTable);
+				auto msgList = func->call();
+				for (const auto &resp: msgList)
+				{
+					msg += " msgList=" + resp;
+				}
+			} catch (std::exception& e)
+			{
+				msg += " fail";
+				msg += e.what();
 			}
 			ui->result->append(msg);
 		});
 		QObject::connect(newPB, &MyButton::rightClicked, [&](const func_Data *func) {
-			qDebug() << "rightClicked";
-			if (func)
-				func->display2table(ui->param_inputTable);
-			else
-				qDebug() << "func is nullptr";
+			func->display2table(ui->param_inputTable);
 		});
 	}
 
@@ -220,9 +175,6 @@ void MainWindow::on_Close_triggered()
 		delete lib;
 		lib = nullptr;
 	}
-	funcList.clear();
-	funcPtr.clear();
-	funcMap.clear();
 
 	for (int i{ui->funcButton_gLayout->count()}; i > 1; i--)
 	{
@@ -258,7 +210,6 @@ std::string formatJson(wchar_t *json)
 			formattedJson += json[i];
 			continue;
 		}
-
 
 		if (json[i] == ' ' || json[i] == '\n' || json[i] == '\r' || json[i] == '\t')
 		{
@@ -311,34 +262,12 @@ std::string formatJson(wchar_t *json)
 
 void MainWindow::on_pB_Test1_clicked()
 {
-	QJsonObject configs = readJsonFile(ui->ConfigPath->text());
-	if (configs.empty())
-	{
-		ui->result->setText("配置文件错误");
-		return;
-	}
-//	ui->result->append(printJson(configs));
-	for (const auto &key: configs.keys())
-	{
-//		ui->result->append(key + ":" + printJson(configs[key]));
-	}
-
-	for (QJsonObject::const_iterator iter = configs.begin(); iter != configs.end(); ++iter)
-	{
-		ui->result->append(iter.key() + ": " + printJson(iter.value().toObject()));
-	}
 
 }
 
 void MainWindow::on_pB_Test2_clicked()
 {
-	QStringList func_params;
-	func_params << "param 1" << "param 2" << "param 3" << "param 4";
 
-	QStringList func_args;
-	func_args << "arg 1" << "arg 2" << "arg 3" << "arg 4";
-
-	func_display2table(ui->param_inputTable, new QTableWidgetItem("func_name"), func_params, func_args);
 }
 
 void MainWindow::on_pB_Test3_clicked()
