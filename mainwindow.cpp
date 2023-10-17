@@ -1,24 +1,14 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "funcData_Button.h"
 
-#include <map>
-#include <utility>
 #include <vector>
 
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QTextStream>
-#include <QDebug>
-#include <QTableWidget>
-#include <QJsonArray>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QVariantMap>
-#include <QListWidget>
-
-//#include "FuncPtr.h"
-#include "MyButton.h"
 
 /*
 	arg——实参（Argument）
@@ -40,7 +30,6 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->setupUi(this);
 	flowLayout = new FlowLayout();
 	ui->funcButton_gLayout->addLayout(flowLayout, 0, 0);
-
 }
 
 MainWindow::~MainWindow()
@@ -129,7 +118,7 @@ void MainWindow::on_pB_LOAD_clicked()
 	{
 //		ui->result->append(key + ":" + printJson(configs[key]));
 
-		auto *newPB = new MyButton(key, configs[key], this);
+		auto *newPB = new funcData_Button(key, configs[key], this);
 		newPB->autoResize();
 		if (!newPB->func_loadLib(lib))
 		{
@@ -141,7 +130,7 @@ void MainWindow::on_pB_LOAD_clicked()
 //		ui->funcButton_gLayout->addWidget(newPB, 0, i++);
 		flowLayout->addWidget(newPB);
 
-		QObject::connect(newPB, &MyButton::leftClicked, [&](func_Data *func) {
+		QObject::connect(newPB, &funcData_Button::leftClicked, [&](func_Data *func) {
 			QString msg = "Call " + func->getName();
 			try
 			{
@@ -158,7 +147,7 @@ void MainWindow::on_pB_LOAD_clicked()
 			}
 			ui->result->append(msg);
 		});
-		QObject::connect(newPB, &MyButton::rightClicked, [&](const func_Data *func) {
+		QObject::connect(newPB, &funcData_Button::rightClicked, [&](const func_Data *func) {
 			func->display2table(ui->param_inputTable);
 		});
 	}
@@ -169,6 +158,9 @@ void MainWindow::on_pB_LOAD_clicked()
 void MainWindow::on_Close_triggered()
 {
 	ui->param_inputTable->clear();
+	ui->param_inputTable->setRowCount(0);
+	ui->param_inputTable->setColumnCount(0);
+
 	ui->result->clear();
 	if (lib)
 	{
@@ -178,9 +170,18 @@ void MainWindow::on_Close_triggered()
 
 	for (int i{ui->funcButton_gLayout->count()}; i > 1; i--)
 	{
-		auto *button = qobject_cast<MyButton *>(ui->funcButton_gLayout->itemAt(i - 1)->widget());
+		auto *button = qobject_cast<funcData_Button *>(ui->funcButton_gLayout->itemAt(i - 1)->widget());
 
 		ui->funcButton_gLayout->removeWidget(button);
+		button->hide();
+		delete button;
+	}
+
+	for (int i{flowLayout->count()}; i > 0 ; i--)
+	{
+		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(0)->widget());
+
+		flowLayout->removeWidget(button);
 		button->hide();
 		delete button;
 	}
@@ -188,81 +189,12 @@ void MainWindow::on_Close_triggered()
 	ui->pB_LOAD->show();
 }
 
-
-std::string formatJson(wchar_t *json)
-{
-	int indent = 0;
-
-	std::string formattedJson;
-
-	bool inQuote = false;
-
-	for (int i = 0; json[i]; i++)
-	{
-		if (json[i] == '"')
-		{
-			formattedJson += json[i];
-			inQuote = !inQuote;
-			continue;
-		}
-		if (inQuote)                // ""内的内容不做处理
-		{
-			formattedJson += json[i];
-			continue;
-		}
-
-		if (json[i] == ' ' || json[i] == '\n' || json[i] == '\r' || json[i] == '\t')
-		{
-			continue;
-		}
-		else if (json[i] == '{' || json[i] == '[')
-		{
-			if (json[i + 1] == '}')
-			{
-				formattedJson += "{}";
-				i++;
-				continue;
-			}
-			formattedJson += json[i];
-			formattedJson += "\r\n";
-			indent++;
-			for (int j = 0; j < indent; j++)
-			{
-				formattedJson += "\t";
-			}
-		}
-		else if (json[i] == '}' || json[i] == ']')
-		{
-			formattedJson += "\r\n";
-			indent--;
-			for (int j = 0; j < indent; j++)
-			{
-				formattedJson += "\t";
-			}
-			formattedJson += json[i];
-		}
-		else if (json[i] == ',')
-		{
-			formattedJson += json[i];
-			formattedJson += "\r\n";
-			for (int j = 0; j < indent; j++)
-			{
-				formattedJson += "\t";
-			}
-		}
-		else
-		{
-			formattedJson += json[i];
-		}
-	}
-
-	return formattedJson;
-}
-
-
 void MainWindow::on_pB_Test1_clicked()
 {
-
+	static int var{1};
+	auto *newPB = new funcData_Button(QString::number(var++), this);
+	newPB->autoResize();
+	flowLayout->addWidget(newPB);
 }
 
 void MainWindow::on_pB_Test2_clicked()

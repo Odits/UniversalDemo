@@ -16,19 +16,23 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        MyButton.h
-        DynamicLib.h
-        FuncPtr.h
-		flowlayout.cpp
-		flowlayout.h
+	main.cpp
+	mainwindow.cpp
+	mainwindow.h
+	mainwindow.ui
+	DynamicLib.h
+	flowlayout.cpp
+	flowlayout.h
+	funcData_Button.h
+	funcData_Button.cpp
 )
 
 add_executable(UniversalDemo ${PROJECT_SOURCES})
 target_link_libraries(UniversalDemo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 add_library(TestLibrary SHARED TestLibrary/TestLibrary.h TestLibrary/TestLibrary.cpp)
-#target_link_libraries(TestLiber)
+
+IF (NOT WIN32)
+	target_link_libraries(UniversalDemo PRIVATE -ldl)
+	target_link_libraries(TestLibrary -ldl)
+ENDIF ()
