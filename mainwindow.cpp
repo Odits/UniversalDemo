@@ -28,8 +28,12 @@ MainWindow::MainWindow(QWidget *parent)
 		: QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	ui->splitter->setStretchFactor(0, 30);
+	ui->splitter->setStretchFactor(1, 70);
+
 	flowLayout = new FlowLayout();
-	ui->funcButton_gLayout->addLayout(flowLayout, 0, 0);
+	ui->main_vLayout->insertLayout(1, flowLayout);
+	ui->main_vLayout->setStretch(1, 1);
 }
 
 MainWindow::~MainWindow()
@@ -39,6 +43,15 @@ MainWindow::~MainWindow()
 	{
 		delete lib;
 		lib = nullptr;
+	}
+
+	for (int i{flowLayout->count()}; i > 0 ; i--)
+	{
+		auto *widget = flowLayout->itemAt(0)->widget();
+
+		flowLayout->removeWidget(widget);
+		widget->hide();
+		delete widget;
 	}
 }
 
@@ -126,8 +139,6 @@ void MainWindow::on_pB_LOAD_clicked()
 			ui->result->append(errMsg);
 			continue;
 		}
-
-//		ui->funcButton_gLayout->addWidget(newPB, 0, i++);
 		flowLayout->addWidget(newPB);
 
 		QObject::connect(newPB, &funcData_Button::leftClicked, [&](func_Data *func) {
@@ -154,7 +165,6 @@ void MainWindow::on_pB_LOAD_clicked()
 
 }
 
-
 void MainWindow::on_Close_triggered()
 {
 	ui->param_inputTable->clear();
@@ -166,15 +176,6 @@ void MainWindow::on_Close_triggered()
 	{
 		delete lib;
 		lib = nullptr;
-	}
-
-	for (int i{ui->funcButton_gLayout->count()}; i > 1; i--)
-	{
-		auto *button = qobject_cast<funcData_Button *>(ui->funcButton_gLayout->itemAt(i - 1)->widget());
-
-		ui->funcButton_gLayout->removeWidget(button);
-		button->hide();
-		delete button;
 	}
 
 	for (int i{flowLayout->count()}; i > 0 ; i--)
@@ -195,11 +196,20 @@ void MainWindow::on_pB_Test1_clicked()
 	auto *newPB = new funcData_Button(QString::number(var++), this);
 	newPB->autoResize();
 	flowLayout->addWidget(newPB);
+	qDebug() << "add " << newPB;
 }
 
 void MainWindow::on_pB_Test2_clicked()
 {
+	for (int i{flowLayout->count()}; i > 0 ; i--)
+	{
+		auto *widget = flowLayout->itemAt(0)->widget();
 
+		qDebug() << "remove " << widget;
+		flowLayout->removeWidget(widget);
+		widget->hide();
+		delete widget;
+	}
 }
 
 void MainWindow::on_pB_Test3_clicked()

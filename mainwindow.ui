@@ -83,7 +83,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="main_vLayout">
+     <layout class="QVBoxLayout" name="main_vLayout" stretch="1,100">
       <item>
        <layout class="QHBoxLayout" name="load_hLayout">
         <item>
@@ -103,9 +103,6 @@
          </widget>
         </item>
        </layout>
-      </item>
-      <item>
-       <layout class="QGridLayout" name="funcButton_gLayout"/>
       </item>
       <item>
        <widget class="QSplitter" name="splitter">
