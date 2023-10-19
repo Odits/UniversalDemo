@@ -89,12 +89,18 @@ class funcData_Button : public QPushButton
 Q_OBJECT
 	func_Data *func;
 public:
-	explicit funcData_Button(QWidget *parent = nullptr) : QPushButton(parent) {}
+	explicit funcData_Button(QWidget *parent = nullptr) : QPushButton(parent), func(nullptr) {}
+	// 这两个构造必须初始化func，不然析构时会崩溃
+	explicit funcData_Button(const QString &text, QWidget *parent = nullptr) : QPushButton(text, parent), func(nullptr) {}
 
-	explicit funcData_Button(const QString &text, QWidget *parent = nullptr) : QPushButton(text, parent) {}
-
+	// 这个构造里的init_func已初始化func
 	explicit funcData_Button(const QString &func_declare, const QJsonValue &func_argsList, QWidget *parent = nullptr)
 			: QPushButton(init_func(func_declare, func_argsList), parent) {}
+
+	~funcData_Button() override
+	{
+		delete func;
+	}
 
 	int getTextWidth()
 	{
@@ -147,11 +153,6 @@ public:
 			return false;
 	}
 
-	~funcData_Button() override
-	{
-		delete func;
-	}
-
 signals:
 
 	void leftClicked(func_Data *);
@@ -165,7 +166,7 @@ protected:
 		{
 			emit rightClicked(this->func);
 		}
-		if (event->button() == Qt::LeftButton)
+		else if (event->button() == Qt::LeftButton)
 		{
 			emit leftClicked(this->func);
 		}

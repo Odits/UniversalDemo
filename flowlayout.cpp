@@ -115,12 +115,12 @@ QLayoutItem *FlowLayout::takeAt(int index)
 	if (index >= 0 && index < itemList.size())
 		return itemList.takeAt(index);
 	else
-		return 0;
+		return nullptr;
 }
 
 Qt::Orientations FlowLayout::expandingDirections() const
 {
-	return 0;
+	return nullptr;
 }
 
 bool FlowLayout::hasHeightForWidth() const
@@ -131,14 +131,14 @@ bool FlowLayout::hasHeightForWidth() const
 /// 根据宽度计算出高度
 int FlowLayout::heightForWidth(int width) const
 {
-	qDebug() << __func__ << "width=" << width;
+//	qDebug() << __func__ << "width=" << width;
 	int height = doLayout(QRect(0, 0, width, 0), false);
 	return height;
 }
 
 void FlowLayout::setGeometry(const QRect &rect)
 {
-	qDebug() << __func__;
+//	qDebug() << __func__;
 	QLayout::setGeometry(rect);
 	doLayout(rect, true);
 }
@@ -165,7 +165,6 @@ int FlowLayout::doLayout(const QRect &rect, bool setGeometry) const
 
 	// 计算有效的布局矩形，考虑了内边距
 	QRect effectiveRect = rect.adjusted(+left, +top, -right, -bottom);
-	qDebug() << effectiveRect;
 	int x = effectiveRect.x();  // 子控件的水平位置
 	int y = effectiveRect.y();  // 子控件的垂直位置
 	int lineHeight = 0;         // 当前行的最大高度
@@ -178,8 +177,26 @@ int FlowLayout::doLayout(const QRect &rect, bool setGeometry) const
 	if (spaceY == -1)
 		spaceY = wid->style()->layoutSpacing(QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
 
-	QList<QPoint> item_point;
-	int line_item_width{0};        // 当前行的所有子控件的总宽度
+	QList<int> line_offset;
+	if (setGeometry)
+	{
+		int line_item_width{0};        // 当前行的所有子控件的总宽度
+		int offset;
+		for (QLayoutItem *item: itemList)
+		{
+			if ((line_item_width + item->sizeHint().width() + spaceX) > effectiveRect.width())
+			{
+				offset = (effectiveRect.width() - (line_item_width - spaceX)) / 2;
+				line_offset.push_back(offset);
+				line_item_width = item->sizeHint().width() + spaceX;    // 重置当前行的所有子控件的总宽度
+			}
+			else
+				line_item_width += item->sizeHint().width() + spaceX;
+		}
+		offset = (effectiveRect.width() - (line_item_width - spaceX)) / 2;
+		line_offset.push_back(offset);
+	}
+	int line_index{0};
 
 	// 遍历布局中的每个子控件
 	for (QLayoutItem *item: itemList)
@@ -194,7 +211,7 @@ int FlowLayout::doLayout(const QRect &rect, bool setGeometry) const
 			y = y + lineHeight + spaceY;  // 下移一行
 			nextX = x + item->sizeHint().width() + spaceX;  // 更新右边界
 			lineHeight = 0;  // 重置行高
-			line_item_width = 0;    // 重置当前行的所有子控件的总宽度
+			line_index++;
 		}
 		else
 			nextX += spaceX;
@@ -202,22 +219,12 @@ int FlowLayout::doLayout(const QRect &rect, bool setGeometry) const
 		// 设置子控件的位置
 		if (setGeometry)
 		{
-			line_item_width += item->sizeHint().width() + spaceX;
-			item_point.push_back(QPoint(x, y));
+			item->setGeometry(QRect(QPoint(x + line_offset[line_index], y), item->sizeHint()));
 		}
 
 		x = nextX;  // 更新下一个子控件的水平位置
 		lineHeight = qMax(lineHeight, item->sizeHint().height());  // 更新当前行的最大高度
 	}
-
-	if (setGeometry)
-		for (int i = 0; i < itemList.size(); i++)
-		{
-			int offset = (effectiveRect.width() - (line_item_width - spaceX)) / 2;
-			qDebug() << "offset=" << offset;
-			item_point[i].rx() += offset;
-			itemList[i]->setGeometry(QRect(item_point[i], itemList[i]->sizeHint()));
-		}
 
 	// 返回整个流式布局的高度
 	return y + lineHeight - rect.y() + bottom;
@@ -233,12 +240,12 @@ int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const
 	}
 	else if (parent->isWidgetType())
 	{
-		QWidget *pw = static_cast<QWidget *>(parent);
-		return pw->style()->pixelMetric(pm, 0, pw);
+		auto *pw = dynamic_cast<QWidget *>(parent);
+		return pw->style()->pixelMetric(pm, nullptr, pw);
 	}
 	else
 	{
-		return static_cast<QLayout *>(parent)->spacing();
+		return dynamic_cast<QLayout *>(parent)->spacing();
 	}
 }
 

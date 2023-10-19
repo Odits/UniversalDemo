@@ -28,8 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
 		: QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-	ui->splitter->setStretchFactor(0, 30);
-	ui->splitter->setStretchFactor(1, 70);
+	ui->splitter->setStretchFactor(0, 40);
+	ui->splitter->setStretchFactor(1, 60);
 
 	flowLayout = new FlowLayout();
 	ui->main_vLayout->insertLayout(1, flowLayout);
@@ -96,6 +96,12 @@ void MainWindow::on_LibrarySelector_clicked()
 	}
 }
 
+void MainWindow::on_SelectLibrary_triggered()
+{
+	on_LibrarySelector_clicked();
+}
+
+
 void MainWindow::on_ConfigSelector_clicked()
 {
 	QString fileName = QFileDialog::getOpenFileName(
@@ -113,6 +119,12 @@ void MainWindow::on_ConfigSelector_clicked()
 		ui->ConfigPath->setText(fileName);
 	}
 }
+
+void MainWindow::on_SelectConfig_triggered()
+{
+	on_ConfigSelector_clicked();
+}
+
 
 void MainWindow::on_pB_LOAD_clicked()
 {
@@ -190,6 +202,18 @@ void MainWindow::on_Close_triggered()
 	ui->pB_LOAD->show();
 }
 
+
+void MainWindow::on_Save_triggered()
+{
+
+}
+
+void MainWindow::on_SaveAs_triggered()
+{
+
+}
+
+
 void MainWindow::on_pB_Test1_clicked()
 {
 	static int var{1};
@@ -216,3 +240,4 @@ void MainWindow::on_pB_Test3_clicked()
 {
 
 }
+

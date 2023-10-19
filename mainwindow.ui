@@ -155,21 +155,21 @@
     <property name="title">
      <string>动态库</string>
     </property>
-    <addaction name="SeleteLibrary"/>
+    <addaction name="SelectLibrary"/>
     <addaction name="Close"/>
    </widget>
    <widget class="QMenu" name="Config">
     <property name="title">
      <string>配置文件</string>
     </property>
-    <addaction name="SeleteConfig"/>
+    <addaction name="SelectConfig"/>
     <addaction name="Save"/>
-    <addaction name="Resave"/>
+    <addaction name="SaveAs"/>
    </widget>
    <addaction name="Library"/>
    <addaction name="Config"/>
   </widget>
-  <action name="SeleteLibrary">
+  <action name="SelectLibrary">
    <property name="text">
     <string>选择动态库</string>
    </property>
@@ -179,7 +179,7 @@
     <string>保存</string>
    </property>
   </action>
-  <action name="Resave">
+  <action name="SaveAs">
    <property name="text">
     <string>另存为</string>
    </property>
@@ -189,7 +189,7 @@
     <string>关闭动态库</string>
    </property>
   </action>
-  <action name="SeleteConfig">
+  <action name="SelectConfig">
    <property name="text">
     <string>选择配置文件</string>
    </property>

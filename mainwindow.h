@@ -35,6 +35,14 @@ private slots:
 
 	void on_Close_triggered();
 
+    void on_SelectLibrary_triggered();
+
+    void on_Save_triggered();
+
+    void on_SaveAs_triggered();
+
+    void on_SelectConfig_triggered();
+
 private:
 	Ui::MainWindow *ui;
 	DynamicLib *lib{};
