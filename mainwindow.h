@@ -17,6 +17,9 @@ Q_OBJECT
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
 
+	void setLibrary(const QString&);
+	void setConfig(const QString&);
+
 	~MainWindow() override;
 
 private slots:

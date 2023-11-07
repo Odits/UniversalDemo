@@ -12,7 +12,9 @@ i = int
 pi = int*
 
 c = char
+uc = unsigned char = byte
 pc = char*
+puc = unsigned char* = byte*
 str = const char*
 
 d = double
@@ -20,40 +22,181 @@ pd = double*
 
 */
 
-typedef int (*i_F_i_i)(int, int);
 
 static int i_F_i_i_(void *func, int arg1, int arg2)
 {
+	using i_F_i_i = int (*)(int, int);
 	return i_F_i_i(func)(arg1, arg2);
 }
 
-typedef int (*i_F_i_pc_i)(int, char *, int);
-
-static int i_F_i_pc_i_(void *func, int arg1, char *arg2, int arg3)
-{
-	return i_F_i_pc_i(func)(arg1, arg2, arg3);
-}
-
-typedef void (*v_F_i_pc)(int, char *);
-
 static void v_F_i_pc_(void *func, int arg1, char *arg2)
 {
+	using v_F_i_pc = void (*)(int, char *);
 	return v_F_i_pc(func)(arg1, arg2);
 }
 
-typedef void (*v_F_i_str)(int, const char *);
-
 static void v_F_i_str_(void *func, int arg1, const char *arg2)
 {
+	using v_F_i_str = void (*)(int, const char *);
 	return v_F_i_str(func)(arg1, arg2);
 }
 
-typedef int (*i_F_pc_pc_pc_i_i)(char *, char *, char *, int, int);
-
 static int i_F_pc_pc_pc_i_i_(void *func, char *arg1, char *arg2, char *arg3, int arg4, int arg5)
 {
+	using i_F_pc_pc_pc_i_i = int (*)(char *, char *, char *, int, int);
 	return i_F_pc_pc_pc_i_i(func)(arg1, arg2, arg3, arg4, arg5);
 }
+static int i_F_i_pc_i_pc_pc_i_pc_pc_pc_pc_i_pc_i_pc_pc_(void *func, int arg1, char *arg2, int arg3, char *arg4, char *arg5,
+														int arg6, char *arg7, char *arg8, char *arg9, char *arg10, int arg11,
+														char *arg12, int arg13, char *arg14, char *arg15)
+{
+	using i_F_i_pc_i_pc_pc_i_pc_pc_pc_pc_i_pc_i_pc_pc = int (*)(int, char *, int, char *, char *, int, char *, char *, char *, char *, int, char *, int, char *, char *);
+	return i_F_i_pc_i_pc_pc_i_pc_pc_pc_pc_i_pc_i_pc_pc(func)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+}
+
+static int i_F_i_i_i_(void *func, int arg1, int arg2, int arg3)
+{
+	using i_F_i_i_i = int (*)(int, int, int);
+	return i_F_i_i_i(func)(arg1, arg2, arg3);
+}
+
+static int i_F_i_pc_(void *func, int arg1, char *arg2)
+{
+	using i_F_i_pc = int (*)(int, char *);
+	return i_F_i_pc(func)(arg1, arg2);
+}
+
+static int i_F_i_pc_pc_(void *func, int arg1, char *arg2, char *arg3)
+{
+	using i_F_i_pc_pc = int (*)(int, char *, char *);
+	return i_F_i_pc_pc(func)(arg1, arg2, arg3);
+}
+
+static int i_F_i_i_i_i_pc_pc_(void *func, int arg1, int arg2, int arg3, int arg4, char *arg5, char *arg6)
+{
+	using i_F_i_i_i_i_pc_pc = int (*)(int, int, int, int, char *, char *);
+	return i_F_i_i_i_i_pc_pc(func)(arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+static int i_F_i_pc_i_(void *func, int arg1, char *arg2, int arg3)
+{
+	using i_F_i_pc_i = int (*)(int, char *, int);
+	return i_F_i_pc_i(func)(arg1, arg2, arg3);
+}
+
+static int i_F_i_pc_pc_i_pc_pc_(void *func, int arg1, char *arg2, char *arg3, int arg4, char *arg5, char *arg6)
+{
+	using i_F_i_pc_pc_i_pc_pc = int (*)(int, char *, char *, int, char *, char *);
+	return i_F_i_pc_pc_i_pc_pc(func)(arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+static int i_F_i_(void *func, int arg1)
+{
+	using i_F_i = int (*)(int);
+	return i_F_i(func)(arg1);
+}
+
+static int i_F_i_pc_pc_i_pc_pc_i_pc_pc_(void *func, int arg1, char *arg2, char *arg3, int arg4, char *arg5, char *arg6, int arg7, char *arg8, char *arg9)
+{
+	using i_F_i_pc_pc_i_pc_pc_i_pc_pc = int (*)(int, char *, char *, int, char *, char *, int, char *, char *);
+	return i_F_i_pc_pc_i_pc_pc_i_pc_pc(func)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+
+static int i_F_i_pi_(void *func, int arg1, int *arg2)
+{
+	using i_F_i_pi = int (*)(int, int *);
+	return i_F_i_pi(func)(arg1, arg2);
+}
+
+static int i_F_i_i_pc_pc_pc_pc_pc_pc_(void *func, int arg1, int arg2, char *arg3, char *arg4, char *arg5, char *arg6, char *arg7, char *arg8)
+{
+	using i_F_i_i_pc_pc_pc_pc_pc_pc = int (*)(int, int, char *, char *, char *, char *, char *, char *);
+	return i_F_i_i_pc_pc_pc_pc_pc_pc(func)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+}
+
+static int i_F_i_i_i_i_i_i_pc_pc_i_pc_(void *func, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, char *arg7, char *arg8, int arg9, char *arg10)
+{
+	using i_F_i_i_i_i_i_i_pc_pc_i_pc = int (*)(int, int, int, int, int, int, char *, char *, int, char *);
+	return i_F_i_i_i_i_i_i_pc_pc_i_pc(func)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+}
+
+static int i_F_i_i_i_i_i_pc_pc_i_pc_(void *func, int arg1, int arg2, int arg3, int arg4, int arg5, char *arg6, char *arg7, int arg8, char *arg9)
+{
+	using i_F_i_i_i_i_i_pc_pc_i_pc = int (*)(int, int, int, int, int, char *, char *, int, char *);
+	return i_F_i_i_i_i_i_pc_pc_i_pc(func)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+
+static int i_F_i_pc_pc_i_pc_i_(void *func, int arg1, char *arg2, char *arg3, int arg4, char *arg5, int arg6)
+{
+	using i_F_i_pc_pc_i_pc_i = int (*)(int, char *, char *, int, char *, int);
+	return i_F_i_pc_pc_i_pc_i(func)(arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+static int i_F_i_pc_pc_pc_pc_pc_pc_i_i_pc_(void *func, int arg1, char *arg2, char *arg3, char *arg4, char *arg5, char *arg6,
+										   char *arg7, int arg8, int arg9, char *arg10)
+{
+	using i_F_i_pc_pc_pc_pc_pc_pc_i_i_pc = int (*)(int, char *, char *, char *, char *, char *, char *, int, int, char *);
+	return i_F_i_pc_pc_pc_pc_pc_pc_i_i_pc(func)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+}
+
+static int i_F_i_i_i_pc_pc_pi_(void *func, int arg1, int arg2, int arg3, char *arg4, char *arg5, int *arg6)
+{
+	using i_F_i_i_i_pc_pc_pi = int (*)(int, int, int, char *, char *, int *);
+	return i_F_i_i_i_pc_pc_pi(func)(arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+static int i_F_i_i_i_pc_pc_(void *func, int arg1, int arg2, int arg3, char *arg4, char *arg5)
+{
+	using i_F_i_i_i_pc_pc = int (*)(int, int, int, char *, char *);
+	return i_F_i_i_i_pc_pc(func)(arg1, arg2, arg3, arg4, arg5);
+}
+
+using byte = unsigned char;
+
+static int i_F_i_i_puc_i_i_pc_pc_pc_pc_(void *func, int arg1, int arg2, byte *arg3, int arg4, int arg5, char *arg6, char *arg7, char *arg8, char *arg9)
+{
+	using i_F_i_i_puc_i_i_pc_pc_pc_pc = int (*)(int, int, byte *, int, int, char *, char *, char *, char *);
+	return i_F_i_i_puc_i_i_pc_pc_pc_pc(func)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+
+static int i_F_i_pi_pc_pi_pc_pi_(void *func, int arg1, int *arg2, char *arg3, int *arg4, char *arg5, int *arg6)
+{
+	using i_F_i_pi_pc_pi_pc_pi = int (*)(int, int *, char *, int *, char *, int *);
+	return i_F_i_pi_pc_pi_pc_pi(func)(arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+static int i_F_i_puc_i_i_pc_(void *func, int arg1, byte *arg2, int arg3, int arg4, char *arg5)
+{
+	using i_F_i_puc_i_i_pc = int (*)(int, byte *, int, int, char *);
+	return i_F_i_puc_i_i_pc(func)(arg1, arg2, arg3, arg4, arg5);
+}
+
+static int i_F_i_puc_i_i_i_i_i_i_i_pc_pi_pc_pi_(void *func, int arg1, byte *arg2, int arg3, int arg4, int arg5, int arg6,
+												int arg7, int arg8, int arg9, char *arg10, int *arg11, char *arg12, int *arg13)
+{
+	using i_F_i_puc_i_i_i_i_i_i_i_pc_pi_pc_pi = int (*)(int, byte *, int, int, int, int, int, int, int, char *, int *, char *, int *);
+	return i_F_i_puc_i_i_i_i_i_i_i_pc_pi_pc_pi(func)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+}
+
+static int i_F_i_i_puc_i_i_i_i_i_i_i_pc_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc_(void *func, int arg1, int arg2, byte *arg3, int arg4,
+																	   int arg5, int arg6, int arg7, int arg8, int arg9, int arg10,
+																	   char *arg11, int *arg12, char *arg13, int *arg14, char *arg15,
+																	   int *arg16, char *arg17, int *arg18, char *arg19, int *arg20, char *arg21)
+{
+	using i_F_i_i_puc_i_i_i_i_i_i_i_pc_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc = int (*)(int, int, byte *, int, int, int, int, int, int,
+																			   int, char *, int *, char *, int *, char *, int *,
+																			   char *, int *, char *, int *, char *);
+	return i_F_i_i_puc_i_i_i_i_i_i_i_pc_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc(func)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
+																			arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
+																			arg17, arg18, arg19, arg20, arg21);
+}
+
+static int i_F_i_puc_i_i_i_i_i_i_i_(void *func, int arg1, byte *arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9)
+{
+	using i_F_i_puc_i_i_i_i_i_i_i = int (*)(int, byte *, int, int, int, int, int, int, int);
+	return i_F_i_puc_i_i_i_i_i_i_i(func)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+
 
 
 static QString printJson(const QJsonObject &object)
@@ -205,19 +348,45 @@ static QStringList callFunc(const QString &type, void *X, const QVariantList &ar
 static QString getTypeRef(const QString &type)
 {
 	const static std::map<QString, QString> typeRef{
-			{"void",       "v"},
-			{"int",        "i"},
-			{"int*",       "pi"},
-			{"char",       "c"},
-			{"char*",      "pc"},
-			{"constchar*", "str"},
-			{"double",     "d"},
-			{"double*",    "pd"}
+			{"void",          "v"},
+			{"int",           "i"},
+			{"int*",          "pi"},
+			{"char",          "c"},
+			{"unsignedchar",  "uc"},
+			{"byte",          "uc"},
+			{"char*",         "pc"},
+			{"unsignedchar*", "puc"},
+			{"byte*",         "puc"},
+			{"constchar*",    "str"},
+			{"double",        "d"},
+			{"double*",       "pd"}
 	};
 	QString tmp{type};
 	tmp.remove(' ');
 	if (typeRef.count(tmp))
 		return typeRef.at(tmp);
+	else
+		return "";
+}
+
+QString getRefType(const QString &type)
+{
+	const static std::map<QString, QString> refType{
+			{"v",   "void"},
+			{"i",   "int"},
+			{"pi",  "int*"},
+			{"c",   "char"},
+			{"uc",  "unsignedchar"},
+			{"pc",  "char*"},
+			{"puc", "unsignedchar*"},
+			{"str", "constchar*"},
+			{"d",   "double"},
+			{"pd",  "double*"}
+	};
+	QString tmp{type};
+	tmp.remove(' ');
+	if (refType.count(tmp))
+		return refType.at(tmp);
 	else
 		return "";
 }
@@ -245,7 +414,7 @@ static QString declare_parsing(const QString &func_declare, QString &func_name, 
 	else
 		return {};
 
-	for (auto &param: func_paramList)
+	for (auto &param : func_paramList)
 	{
 		param = param.trimmed();
 		int p = param.indexOf('*');
@@ -272,6 +441,7 @@ void func_Data::display2table(QTableWidget *table) const
 	table->setColumnCount(1);
 
 	table->setHorizontalHeaderItem(0, new QTableWidgetItem(name));
+	table->resizeColumnToContents(0);
 	table->setVerticalHeaderLabels(paramList);
 
 	for (int i{}; i < argsList.size(); i++)
@@ -296,18 +466,30 @@ void func_Data::loadArgs(QTableWidget *table)
 {
 	if (table->rowCount() == 0 || table->columnCount() == 0)
 		return;
-	if (getTableName(table) == name)
+	if (getTableName(table) != name)
+		return;
+
+	bool replace{false};
+	if (argsList.size() == table->rowCount())
 	{
-		for (int var{}; var < argsList.size(); var++)
-		{
-			QString str = table->item(var, 0)->text();
-			if (argsList[var].type() == QVariant::Map)
-				argsList[var] = StrToJson(str);
-			else if (argsList[var].type() == QVariant::List)
-				argsList[var] = StrToJsonArray(str);
-			else
-				argsList[var] = str;
-		}
+		replace = true;
+	}
+	for (int var{}; var < table->rowCount(); var++)
+	{
+		QString str = table->item(var, 0)->text();
+		auto first = str[0], last = str[str.length() - 1];
+		QVariant tmp;
+		if (first == '{' && last == '}')
+			tmp = StrToJson(str);
+		else if (first == '[' && last == ']')
+			tmp = StrToJsonArray(str);
+		else
+			tmp = str;
+
+		if (replace)
+			argsList[var] = tmp;
+		else
+			argsList.append(tmp);
 	}
 }
 

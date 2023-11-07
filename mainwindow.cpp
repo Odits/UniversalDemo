@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QStandardPaths>
 
 /*
 	arg——实参（Argument）
@@ -36,6 +37,16 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->main_vLayout->setStretch(1, 1);
 }
 
+void MainWindow::setLibrary(const QString& path)
+{
+	ui->LibraryPath->setText(path);
+}
+
+void MainWindow::setConfig(const QString& path)
+{
+	ui->ConfigPath->setText(path);
+}
+
 MainWindow::~MainWindow()
 {
 	delete ui;
@@ -45,7 +56,7 @@ MainWindow::~MainWindow()
 		lib = nullptr;
 	}
 
-	for (int i{flowLayout->count()}; i > 0 ; i--)
+	for (int i{flowLayout->count()}; i > 0; i--)
 	{
 		auto *widget = flowLayout->itemAt(0)->widget();
 
@@ -76,6 +87,124 @@ QJsonObject readJsonFile(const QString &filePath)
 	return document.object();
 }
 
+void removeComment(QByteArray &str)
+{
+	QByteArray out;
+
+	bool line_comment{false};
+	bool block_comment{false};
+	for (int i = 0; i < str.size(); i++)    // 先判断是否在注释中，尽量早点退出注释，负责再判断注释
+	{
+		if (block_comment)
+		{
+			if (str[i] == '*' && str[i + 1] == '/')
+			{
+				block_comment = false;
+				i++;
+			}
+			continue;    // 在注释中，跳过
+		}
+		if (line_comment)
+		{
+			if (str[i] == '\n')
+			{
+				line_comment = false;
+			}
+			continue;    // 在注释中，跳过
+		}
+
+		if (str[i] == '/' && str[i + 1] == '/')
+		{
+			line_comment = true;
+			i++;
+			continue;
+		}
+		if (str[i] == '/' && str[i + 1] == '*')
+		{
+			block_comment = true;
+			i++;
+			continue;
+		}
+
+		if (str[i] != '\n' && str[i] != '\t')
+			out.append(str[i]);
+	}
+	str.clear();
+	str = out;
+}
+
+QList<QByteArray> getExternFuncs(const QByteArray &str)
+{
+	int start{}, end{};
+
+	for (int i = str.indexOf("extern") + 6; i < str.size(); i++)
+	{
+		if (start == 0)
+		{
+			if (str[i] == ' ')
+			{
+				continue;
+			}
+			else if (str[i] == '"' && str[i + 1] == 'C' && str[i + 2] == '"')
+			{
+				start = i + 3;
+			}
+			else
+				return {};        // error
+		}
+		else
+		{
+			static int inside{0};
+			if (str[i] == '{')
+			{
+				if (inside == 0)
+					start = i + 1;
+				else
+					inside++;
+			}
+			else if (str[i] == '}')
+			{
+				if (inside > 0)
+					inside--;
+				else
+					end = i - 1;
+			}
+		}
+	}
+	return str.mid(start, end - start).split(';');
+}
+
+QJsonObject header2Json(const QString &filePath)
+{
+	QFile file(filePath);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		return {};
+	}
+
+	QByteArray headStr = file.readAll();
+	file.close();
+	removeComment(headStr);
+	auto funcs = getExternFuncs(headStr);
+
+	QJsonObject jsonObject;
+	QJsonObject innerObject;
+	innerObject["args"] = QJsonArray(); // 创建 {"args": []}
+
+	// 使用 keyList 作为键
+	for (const QByteArray &func : funcs)
+	{
+		jsonObject[func] = innerObject;
+	}
+
+	QJsonDocument document(jsonObject);
+	if (document.isNull() || !document.isObject())
+	{
+		return {};
+	}
+
+	return document.object();
+}
 
 
 void MainWindow::on_LibrarySelector_clicked()
@@ -108,7 +237,7 @@ void MainWindow::on_ConfigSelector_clicked()
 			this,
 			tr("open a Config."),
 			"./",
-			tr("Config(*.json);;All files(*.*)"));
+			tr("Config(*.json);;Header(*.h);;All files(*.*)"));
 
 	if (fileName.isEmpty())
 	{
@@ -130,7 +259,12 @@ void MainWindow::on_pB_LOAD_clicked()
 {
 	lib = new DynamicLib(ui->LibraryPath->text().toStdString());
 
-	QJsonObject configs = readJsonFile(ui->ConfigPath->text());
+	QJsonObject configs;
+	auto configPath = ui->ConfigPath->text();
+	if (QFileInfo(configPath).suffix() == "h")
+		configs = header2Json(configPath);
+	else
+		configs = readJsonFile(configPath);
 	if (configs.empty())
 	{
 		ui->result->setText("配置文件错误");
@@ -139,7 +273,7 @@ void MainWindow::on_pB_LOAD_clicked()
 	ui->pB_LOAD->hide();
 
 //	ui->result->append(printJson(configs));
-	for (const auto &key: configs.keys())
+	for (const auto &key : configs.keys())
 	{
 //		ui->result->append(key + ":" + printJson(configs[key]));
 
@@ -155,17 +289,17 @@ void MainWindow::on_pB_LOAD_clicked()
 
 		QObject::connect(newPB, &funcData_Button::leftClicked, [&](func_Data *func) {
 			QString msg = "Call " + func->getName();
+			func->loadArgs(ui->param_inputTable);
 			try
 			{
-				func->loadArgs(ui->param_inputTable);
 				auto msgList = func->call();
-				for (const auto &resp: msgList)
+				for (const auto &resp : msgList)
 				{
 					msg += " msgList=" + resp;
 				}
-			} catch (std::exception& e)
+			} catch (std::exception &e)
 			{
-				msg += " fail";
+				msg += " fail: ";
 				msg += e.what();
 			}
 			ui->result->append(msg);
@@ -174,7 +308,6 @@ void MainWindow::on_pB_LOAD_clicked()
 			func->display2table(ui->param_inputTable);
 		});
 	}
-
 }
 
 void MainWindow::on_Close_triggered()
@@ -190,7 +323,7 @@ void MainWindow::on_Close_triggered()
 		lib = nullptr;
 	}
 
-	for (int i{flowLayout->count()}; i > 0 ; i--)
+	for (int i{flowLayout->count()}; i > 0; i--)
 	{
 		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(0)->widget());
 
@@ -205,12 +338,42 @@ void MainWindow::on_Close_triggered()
 
 void MainWindow::on_Save_triggered()
 {
-
 }
 
 void MainWindow::on_SaveAs_triggered()
 {
+	QString fileName = QFileDialog::getSaveFileName(
+			this,
+			tr("save as Config."),
+			"./",
+			tr("Config(*.json);;All files(*.*)"));
 
+	if (fileName.isEmpty())
+	{
+		QMessageBox::warning(this, "Warning!", "Failed to save this file!");
+		return;
+	}
+
+	QFile file(fileName);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		return;
+	}
+
+	QJsonObject jsonObject;
+
+	for (int i{0}; i < flowLayout->count(); i++)
+	{
+		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(i)->widget());
+		auto buttonObj = button->getJsonObj();
+		jsonObject[std::get<0>(buttonObj)] = std::get<1>(buttonObj);
+	}
+
+	QByteArray data{QJsonDocument(jsonObject).toJson()};
+	file.write(data);
+	file.close();
+
+	ui->ConfigPath->setText(fileName);
 }
 
 
@@ -225,7 +388,7 @@ void MainWindow::on_pB_Test1_clicked()
 
 void MainWindow::on_pB_Test2_clicked()
 {
-	for (int i{flowLayout->count()}; i > 0 ; i--)
+	for (int i{flowLayout->count()}; i > 0; i--)
 	{
 		auto *widget = flowLayout->itemAt(0)->widget();
 
@@ -238,6 +401,23 @@ void MainWindow::on_pB_Test2_clicked()
 
 void MainWindow::on_pB_Test3_clicked()
 {
+	QString tempDir = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
+	auto path{tempDir + "/def.cpp"};
+
+	QFile file(path);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		ui->result->append("fail, path=" + path);
+		return;
+	}
+
+	for (int i{0}; i < flowLayout->count(); i++)
+	{
+		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(i)->widget());
+		file.write(button->getDef().toLocal8Bit());
+	}
+	ui->result->append(path);
 }
+
 
