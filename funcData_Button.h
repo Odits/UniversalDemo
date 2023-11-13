@@ -15,6 +15,8 @@
 
 #include "DynamicLib.h"
 
+bool check_funcList(const QString& func);
+
 QString getRefType(const QString &type);
 
 class func_Data
@@ -103,6 +105,11 @@ public:
 		delete func;
 	}
 
+	func_Data *func_data() const
+	{
+		return func;
+	}
+
 	int getTextWidth()
 	{
 		// 使用 QFontMetrics 计算文本的宽度
@@ -161,94 +168,106 @@ public:
 		return std::make_tuple(func->getDeclare(), args);
 	}
 
-	QString getDef()
+	QString getDefParsing()
 	{
-		//static int i_F_i_i_(void *func, int arg1, int arg2)
-		//{
-		//	using i_F_i_i = int (*)(int, int);
-		//	return i_F_i_i(func)(arg1, arg2);
-		//}
-		QString func_def{"static "};
-
-		QString def{"using "};
-		auto typeRef = func->getTypeRef();
-		def += typeRef + " = ";
-
-		auto retType = getRefType(typeRef.mid(0, typeRef.indexOf('_')));
-		func_def += retType + " " + typeRef + "_(void *func, ";
-		def += retType + " (*)(";
-		int arg_num{1};
-		for (const auto& param : func->getParamList())
-		{
-			int p = param.indexOf('*');
-			if (p == -1)
-				p = param.indexOf(' ');
-
-			auto tmp = param.left(p + 1).remove(' ');
-			def += tmp + ", ";
-
-			func_def += tmp + " arg" + QString::number(arg_num++) + ", ";
-		}
-		func_def.replace(func_def.length() - 2, 2, ")");
-		def.replace(def.length() - 2, 2, ");");
-
-		func_def += "\n{\n\t" + def + "\n\treturn " + typeRef + "(func)(";
-		for (int i{1}; i < arg_num; i++)
-			func_def += "arg" + QString::number(i) + ", ";
-		func_def.replace(func_def.length() - 2, 2, ");");
-		func_def += "\n}\n\n";
-
-		return func_def;
-	}
-
-	QString getParsing()
-	{
-		/*
-else if (type == "i_F_pc_pc_pc_i_i")
+/*
+static QStringList i_F_pc_pc_pc_i_i_(void *func_ptr, const QVariantList &args)
 {
+	using i_F_pc_pc_pc_i_i = int (*)(char *, char *, char *, int, int);			def
+
 	char *arg1 = tran(args[0]);
 	char *arg2 = tran(args[1]);
-	char *arg3 = tran(args[2]);
+	char *arg3 = tran(args[2]);													parsing
 	int arg4 = args[3].toInt();
 	int arg5 = args[4].toInt();
 
-	int retCode = i_F_pc_pc_pc_i_i_(X, arg1, arg2, arg3, arg4, arg5);
+	int retCode = i_F_pc_pc_pc_i_i(func_ptr)(arg1, arg2, arg3, arg4, arg5);		call
 
-	msgList.push_back(QString::number(retCode));
-	msgList.push_back(arg1);
-	msgList.push_back(arg2);
-	msgList.push_back(arg3);
+	QString tmp1{arg1};
 	delete[] arg1;
+	QString tmp2{arg2};															save&clear
 	delete[] arg2;
+	QString tmp3{arg3};
 	delete[] arg3;
-}		 */
 
-		QString parsing{"else if (type == \""};
+	return {QString::number(retCode), tmp1, tmp2, tmp3};						ret
+}
+*/
+		QString func_def{"static QStringList "};
 		auto typeRef = func->getTypeRef();
-		parsing += typeRef + "\")\n{\n\t";
-		auto retType = typeRef[0];
+		func_def += typeRef + "_(void *func_ptr, const QVariantList &args)\n{\n\t";
 
-		auto paramType = typeRef.right(typeRef.indexOf('F') + 1).split('_');
-		for (int i{1}; i <= paramType.length(); i++)
+		QString def{"using "};
+		def += typeRef + " = ";
+
+		auto retType = getRefType(QString(typeRef[0]));
+		def += retType + " (*)(";
+
+		QString call, ret{"return {"};
+		if (typeRef[0] == 'i')
 		{
-			parsing += getRefType(paramType[i]) + " arg" + QString::number(i) + " = ";
+			call = "int retCode = ";
+			ret += "QString::number(retCode), ";
 		}
+		call += "(" + typeRef + "(func_ptr))(";
 
-
-		if (retType == 'i')
+		QString parsing, saveClear;
+		int saveNums{0};
+		auto paramType = typeRef.mid(typeRef.indexOf('F') + 2).split('_');
+		for (int i{0}; i < paramType.length(); i++)
 		{
+			auto refType{getRefType(paramType[i])};
 
+			def += refType + ", ";
+
+			parsing += refType + " arg" + QString::number(i+1) + " = ";
+			if (paramType[i] == "i")
+				parsing += "args[" + QString::number(i) + "].toInt();";
+			else if (paramType[i] == "pi")
+				parsing += "new int(args[" + QString::number(i) + "].toInt());";
+			else if (paramType[i] == "d")
+				parsing += "args[" + QString::number(i) + "].toDouble();";
+			else if (paramType[i] == "pd")
+				parsing += "new double(args[" + QString::number(i) + "].toDouble());";
+			else if (paramType[i] == "c")
+				parsing += "args[" + QString::number(i) + "].toChar();";
+			else if (paramType[i] == "pc" || paramType[i] == "str")
+				parsing += "tran(args[" + QString::number(i) + "]);";
+			else if (paramType[i] == "uc")
+				parsing += "static_cast<unsigned char>(args[" + QString::number(i) + "].toChar());";
+			else if (paramType[i] == "puc" || paramType[i] == "ustr")
+				parsing += "reinterpret_cast<unsigned char *>(args[" + QString::number(i) + "].toByteArray().data());";
+			parsing += "\n\t";
+
+			call += "arg" + QString::number(i+1) + ", ";
+
+			if (refType.contains("*"))	// 有指针情况
+			{
+				if (!refType.contains("const"))
+				{
+					saveNums++;
+
+					if (paramType[i].contains("u"))
+						saveClear += "QString tmp" + QString::number(saveNums) + "{(char*)arg" + QString::number(i + 1) + "};\n\t";
+					else if (paramType[i].contains("c"))
+						saveClear += "QString tmp" + QString::number(saveNums) + "{arg" + QString::number(i + 1) + "};\n\t";
+					else
+						saveClear += "QString tmp" + QString::number(saveNums) + "{QString::number(*arg" + QString::number(i + 1) + ")};\n\t";
+
+					ret += "tmp" + QString::number(saveNums) + ", ";
+				}
+
+				if (refType.contains("char"))
+					saveClear += "delete[] arg" + QString::number(i+1) + ";\n\t";
+				else
+					saveClear += "delete arg" + QString::number(i+1) + ";\n\t";
+			}
 		}
-		else if (retType == 'v')
-		{
+		def.replace(def.length() - 2, 2, ");\n\n\t");
+		call.replace(call.length() - 2, 2, ");\n\n\t");
+		ret.replace(ret.length() - 2, 2, "};\n}\n");
 
-		}
-		else
-		{
-			std::cerr << "fail, retType is no think yet";
-		}
-
-
+		return {func_def + def + parsing + call + saveClear + ret};
 	}
 
 signals:

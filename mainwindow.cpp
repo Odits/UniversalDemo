@@ -279,13 +279,22 @@ void MainWindow::on_pB_LOAD_clicked()
 
 		auto *newPB = new funcData_Button(key, configs[key], this);
 		newPB->autoResize();
+		flowLayout->addWidget(newPB);
+
+		if (!check_funcList(newPB->func_data()->getTypeRef()))
+		{
+			QString errMsg = "没有实现的函数指针类型：" + newPB->func_data()->getTypeRef();
+			ui->result->append(errMsg);
+			newPB->setDisabled(true);
+			continue;
+		}
 		if (!newPB->func_loadLib(lib))
 		{
 			QString errMsg = "load function " + newPB->text() + " fail. errMsg=" + lib->getErrorMsg().c_str();
 			ui->result->append(errMsg);
+			newPB->setDisabled(true);
 			continue;
 		}
-		flowLayout->addWidget(newPB);
 
 		QObject::connect(newPB, &funcData_Button::leftClicked, [&](func_Data *func) {
 			QString msg = "Call " + func->getName();
@@ -293,6 +302,7 @@ void MainWindow::on_pB_LOAD_clicked()
 			try
 			{
 				auto msgList = func->call();
+				qDebug() << msgList;
 				for (const auto &resp : msgList)
 				{
 					msg += " msgList=" + resp;
@@ -338,6 +348,34 @@ void MainWindow::on_Close_triggered()
 
 void MainWindow::on_Save_triggered()
 {
+	QFileInfo fileInfo{ui->ConfigPath->text()};
+	if (fileInfo.suffix() != "json")
+	{
+		ui->result->append("当前配置文件不是json，请选择其它保存路径");
+		return on_SaveAs_triggered();
+	}
+
+	QString fileName = fileInfo.fileName();
+	QFile file(fileName);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		return;
+	}
+
+	QJsonObject jsonObject;
+
+	for (int i{0}; i < flowLayout->count(); i++)
+	{
+		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(i)->widget());
+		auto buttonObj = button->getJsonObj();
+		jsonObject[std::get<0>(buttonObj)] = std::get<1>(buttonObj);
+	}
+
+	QByteArray data{QJsonDocument(jsonObject).toJson()};
+	file.write(data);
+	file.close();
+
+	ui->result->append(fileName + "已保存");
 }
 
 void MainWindow::on_SaveAs_triggered()
@@ -401,23 +439,41 @@ void MainWindow::on_pB_Test2_clicked()
 
 void MainWindow::on_pB_Test3_clicked()
 {
+#if 1
 	QString tempDir = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+	auto def_path{tempDir + "/def.cpp"};
 
-	auto path{tempDir + "/def.cpp"};
-
-	QFile file(path);
-	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	QFile def_file(def_path);
+	if (!def_file.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
-		ui->result->append("fail, path=" + path);
+		ui->result->append("fail, def_path=" + def_path);
 		return;
 	}
+
+	QString tmp_map;
 
 	for (int i{0}; i < flowLayout->count(); i++)
 	{
 		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(i)->widget());
-		file.write(button->getDef().toLocal8Bit());
+		if (!button->isEnabled())
+			def_file.write(button->getDefParsing().toLocal8Bit());
+
+		auto typeRef = button->func_data()->getTypeRef();
+		tmp_map += "{\"" + typeRef + "\", " + typeRef + "_},\n\t";
 	}
-	ui->result->append(path);
+	def_file.write(tmp_map.toLocal8Bit());
+	def_file.close();
+	ui->result->append("success, def_path=" + def_path);
+
+#else
+	for (int i{0}; i < flowLayout->count(); i++)
+	{
+		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(i)->widget());
+		button->isEnabled();
+		ui->result->append(button->func_data()->getTypeRef());
+	}
+
+#endif
 }
 
 
