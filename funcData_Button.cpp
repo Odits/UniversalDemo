@@ -96,10 +96,20 @@ static char *tran(const QVariant &var)
 		int list_size = var.toList().size();
 		if (list_size > 0)
 		{
-			arg = new char[var.toList()[0].toInt()]{};
+			size_t len = var.toList()[0].toInt();
+			std::cout << "len=" << len << std::endl;
+			arg = new char[len]{};
 			if (list_size > 1)
 			{
-				strcpy(arg, var.toList()[1].toString().toStdString().c_str());
+				if (var.toList()[1].type() == QVariant::String)
+					strcpy(arg, var.toList()[1].toString().toStdString().c_str());
+				else if (var.toList()[1].type() == QVariant::ByteArray)
+					strcpy(arg, var.toList()[1].toByteArray().data());
+				else if (var.toList()[1].type() == QVariant::Map)
+				{
+					auto qStr{JsonToStr(var.toList()[1].toMap())};
+					strcpy(arg, qStr.toStdString().c_str());
+				}
 			}
 		}
 		else
@@ -184,6 +194,7 @@ static QStringList i_F_i_pc_i_(void *func_ptr, const QVariantList &args)
 
 	int retCode = i_F_i_pc_i(func_ptr)(arg1, arg2, arg3);
 	QString tmp1{arg2};
+	qDebug() << __func__ << "tmp1="<< tmp1;
 	delete[] arg2;
 
 	return {QString::number(retCode), tmp1};
@@ -194,6 +205,7 @@ static QStringList i_F_pc_pc_pc_i_i_(void *func_ptr, const QVariantList &args)
 	if (args.size() != 5)
 		throw std::runtime_error("args.size error");
 	using i_F_pc_pc_pc_i_i = int (*)(char *, char *, char *, int, int);
+	qDebug() << args;
 	char *arg1 = tran(args[0]);
 	char *arg2 = tran(args[1]);
 	char *arg3 = tran(args[2]);
@@ -822,6 +834,38 @@ bool check_funcList(const QString &func)
 	return func_map.count(func);
 }
 
+#if 0	//test
+struct args{
+	int arg1;
+	char* arg2;
+};
+
+args argsParsing(const QVariantList &args)
+{
+	if (args.size() != 2)
+		throw std::runtime_error("args.size error");
+
+	int arg1 = args[0].toInt();
+	char *arg2 = tran(args[1]);
+
+	return {arg1, arg2};
+}
+
+static QStringList v_F_i_str_test(void *func_ptr, const QVariantList &args)
+{
+	if (args.size() != 2)
+		throw std::runtime_error("args.size error");
+
+	using v_F_i_str = void (*)(int, const char *);
+
+	auto [arg1, arg2] = argsParsing(args);
+
+	(v_F_i_str(func_ptr))(arg1, arg2);
+	delete[] arg2;
+
+	return {};
+}
+#endif
 
 static QStringList callFunc(const QString &type, void *X, const QVariantList &args = {})
 {
@@ -914,8 +958,21 @@ void toGbk(QVariant &item)
 {
 	if (item.type() == QVariant::Map)
 	{
+		qDebug() << item;
 		auto tmp = utf8ToGbk(JsonToStr(item.toMap()));
 		item = tmp;	// StrToJson(tmp);这里不保存map了
+		qDebug() << item;
+	}
+	else if (item.type() == QVariant::List)
+	{
+		qDebug() << item;
+		if (item.toList().size() > 1)
+		{
+			auto tmp = item.toList();
+			toGbk(tmp[1]);    // 忽略[0]的大小参数，将[1]的字符串转为QByteArray
+			item = tmp;
+		}
+		qDebug() << item;
 	}
 	else
 	{

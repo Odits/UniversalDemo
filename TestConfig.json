@@ -9,7 +9,7 @@
 		"args": [11, "test"]
 	},
 	"int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);": {
-		"args": [{}, [1024], [128], 15, 15]
+		"args": [[256, {"中文gbk测试": "测试文本"}], [1024], [128], 15, 15]
 	},
 	"void gbkTest(int a1, const char *gbk)": {
 		"args": [1, {"中文gbk测试": "测试文本"}]
