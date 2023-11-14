@@ -12,6 +12,7 @@ void testFunc3(int a1, char* a2);
 
 int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);
 
+void gbkTest(int a1, const char *gbk);
 }
 
 #endif // TESTLIBRARY_H

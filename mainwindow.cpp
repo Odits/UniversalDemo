@@ -35,6 +35,9 @@ MainWindow::MainWindow(QWidget *parent)
 	flowLayout = new FlowLayout();
 	ui->main_vLayout->insertLayout(1, flowLayout);
 	ui->main_vLayout->setStretch(1, 1);
+
+	ui->oeUTF8->setChecked(true);
+	ui->reUTF8->setChecked(true);
 }
 
 void MainWindow::setLibrary(const QString& path)
@@ -64,6 +67,26 @@ MainWindow::~MainWindow()
 		widget->hide();
 		delete widget;
 	}
+}
+
+void MainWindow::on_oeUTF8_triggered()
+{
+	ui->oeGBK->setChecked(false);
+}
+
+void MainWindow::on_oeGBK_triggered()
+{
+	ui->oeUTF8->setChecked(false);
+}
+
+void MainWindow::on_reUTF8_triggered()
+{
+	ui->reGBK->setChecked(false);
+}
+
+void MainWindow::on_reGBK_triggered()
+{
+	ui->reUTF8->setChecked(false);
 }
 
 
@@ -301,8 +324,8 @@ void MainWindow::on_pB_LOAD_clicked()
 			func->loadArgs(ui->param_inputTable);
 			try
 			{
-				auto msgList = func->call();
-				qDebug() << msgList;
+				auto msgList = func->call(ui->oeGBK->isChecked());
+//				qDebug() << msgList;
 				for (const auto &resp : msgList)
 				{
 					msg += " msgList=" + resp;
@@ -455,11 +478,13 @@ void MainWindow::on_pB_Test3_clicked()
 	for (int i{0}; i < flowLayout->count(); i++)
 	{
 		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(i)->widget());
-		if (!button->isEnabled())
+//		if (!button->isEnabled())
+		{
 			def_file.write(button->getDefParsing().toLocal8Bit());
 
-		auto typeRef = button->func_data()->getTypeRef();
-		tmp_map += "{\"" + typeRef + "\", " + typeRef + "_},\n\t";
+			auto typeRef = button->func_data()->getTypeRef();
+			tmp_map += "{\"" + typeRef + "\", " + typeRef + "_},\n\t";
+		}
 	}
 	def_file.write(tmp_map.toLocal8Bit());
 	def_file.close();
@@ -474,6 +499,7 @@ void MainWindow::on_pB_Test3_clicked()
 	}
 
 #endif
-}
+
+};
 
 

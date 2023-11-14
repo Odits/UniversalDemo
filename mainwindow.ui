@@ -174,12 +174,13 @@
      <property name="title">
       <string>接收编码</string>
      </property>
-     <addaction name="rcUTF8"/>
+     <addaction name="reUTF8"/>
      <addaction name="reGBK"/>
     </widget>
     <widget class="QMenu" name="outputEncode">
      <property name="title">
-      <string>输出编码</string>
+      <string>输出编码
+</string>
      </property>
      <addaction name="oeUTF8"/>
      <addaction name="oeGBK"/>
@@ -216,22 +217,34 @@
     <string>选择配置文件</string>
    </property>
   </action>
-  <action name="rcUTF8">
+  <action name="reUTF8">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>UTF-8</string>
    </property>
   </action>
   <action name="oeUTF8">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>UTF-8</string>
    </property>
   </action>
   <action name="oeGBK">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>GB18030</string>
    </property>
   </action>
   <action name="reGBK">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>GB18030</string>
    </property>

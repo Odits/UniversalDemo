@@ -72,12 +72,7 @@ public:
 		this->ptr = func_ptr;
 	}
 
-	QStringList call() const;
-
-	static QStringList call(const func_Data *func)
-	{
-		return func->call();
-	}
+	QStringList call(bool isGBK = false) const;
 
 	void loadArgs(QTableWidget *table);
 };
@@ -173,6 +168,8 @@ public:
 /*
 static QStringList i_F_pc_pc_pc_i_i_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 5)
+		throw std::runtime_error("args.size error");
 	using i_F_pc_pc_pc_i_i = int (*)(char *, char *, char *, int, int);			def
 
 	char *arg1 = tran(args[0]);
@@ -267,7 +264,10 @@ static QStringList i_F_pc_pc_pc_i_i_(void *func_ptr, const QVariantList &args)
 		call.replace(call.length() - 2, 2, ");\n\n\t");
 		ret.replace(ret.length() - 2, 2, "};\n}\n");
 
-		return {func_def + def + parsing + call + saveClear + ret};
+		QString check{"if (args.size() != " + QString::number(paramType.length()) + ")\n\t\t"};
+		check += "throw std::runtime_error(\"args.size error\");\n\t";
+
+		return {func_def + check + def + parsing + call + saveClear + ret};
 	}
 
 signals:

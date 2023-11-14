@@ -46,6 +46,14 @@ private slots:
 
     void on_SelectConfig_triggered();
 
+    void on_oeUTF8_triggered();
+
+    void on_oeGBK_triggered();
+
+    void on_reUTF8_triggered();
+
+    void on_reGBK_triggered();
+
 private:
 	Ui::MainWindow *ui;
 	DynamicLib *lib{};

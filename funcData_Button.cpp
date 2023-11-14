@@ -53,6 +53,16 @@ static QVariantMap StrToJson(const QString &str)
 	return document.object().toVariantMap();
 }
 
+static QVariantMap StrToJson(const QByteArray &byteArray)
+{
+	QJsonDocument document = QJsonDocument::fromJson(byteArray);
+	if (document.isNull() || !document.isObject())
+	{
+		return {};
+	}
+	return document.object().toVariantMap();
+}
+
 static QString JsonArrayToStr(const QVariantList &list)
 {
 	QJsonArray array = QJsonArray::fromVariantList(list);
@@ -70,6 +80,11 @@ static QVariantList StrToJsonArray(const QString &str)
 	return document.array().toVariantList();
 }
 
+#define printHEX(buf, len)                    \
+    printf("%d: %s(HEX) = ", __LINE__, #buf); \
+    for (int i = 0; i < len; i++)             \
+        printf("%02hhX ", buf[i]);            \
+    printf("\n");
 
 #define BUF_SIZE 1024
 
@@ -81,7 +96,7 @@ static char *tran(const QVariant &var)
 		int list_size = var.toList().size();
 		if (list_size > 0)
 		{
-			arg = new char[var.toList()[0].toInt()];
+			arg = new char[var.toList()[0].toInt()]{};
 			if (list_size > 1)
 			{
 				strcpy(arg, var.toList()[1].toString().toStdString().c_str());
@@ -89,17 +104,24 @@ static char *tran(const QVariant &var)
 		}
 		else
 		{
-			arg = new char[BUF_SIZE];
+			arg = new char[BUF_SIZE]{};
 		}
 	}
 	else if (var.type() == QVariant::Map)
 	{
-		arg = new char[BUF_SIZE];
-		strcpy(arg, JsonToStr(var.toMap()).toStdString().c_str());
+        auto str{JsonToStr(var.toMap()).toStdString()};
+        arg = new char[str.size() + 1]{};
+        strncpy(arg, str.c_str(), str.size());
+	}
+	else if (var.type() == QVariant::ByteArray)
+	{
+		auto byteArray{var.toByteArray()};
+		arg = new char[byteArray.size() + 1]{};
+		memcpy(arg, byteArray.data(), byteArray.size());
 	}
 	else
 	{
-		arg = new char[BUF_SIZE];
+		arg = new char[BUF_SIZE]{};
 		strcpy(arg, var.toString().toStdString().c_str());
 	}
 	return arg;
@@ -111,6 +133,8 @@ using func_type = QStringList (*)(void *func_ptr, const QVariantList &args);
 
 static QStringList i_F_i_i_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 2)
+		throw std::runtime_error("args.size error");
 	using i_F_i_i = int (*)(int, int);
 
 	int arg1 = args[0].toInt();
@@ -122,6 +146,8 @@ static QStringList i_F_i_i_(void *func_ptr, const QVariantList &args)
 
 static QStringList v_F_i_pc_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 2)
+		throw std::runtime_error("args.size error");
 	using v_F_i_pc = void (*)(int, char *);
 	int arg1 = args[0].toInt();
 	char *arg2 = tran(args[1]);
@@ -135,6 +161,8 @@ static QStringList v_F_i_pc_(void *func_ptr, const QVariantList &args)
 
 static QStringList v_F_i_str_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 2)
+		throw std::runtime_error("args.size error");
 	using v_F_i_str = void (*)(int, const char *);
 	int arg1 = args[0].toInt();
 	char *arg2 = tran(args[1]);
@@ -147,6 +175,8 @@ static QStringList v_F_i_str_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_i_pc_i_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 3)
+		throw std::runtime_error("args.size error");
 	using i_F_i_pc_i = int (*)(int, char *, int);
 	int arg1 = args[0].toInt();
 	char *arg2 = tran(args[1]);
@@ -161,6 +191,8 @@ static QStringList i_F_i_pc_i_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_pc_pc_pc_i_i_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 5)
+		throw std::runtime_error("args.size error");
 	using i_F_pc_pc_pc_i_i = int (*)(char *, char *, char *, int, int);
 	char *arg1 = tran(args[0]);
 	char *arg2 = tran(args[1]);
@@ -180,10 +212,15 @@ static QStringList i_F_pc_pc_pc_i_i_(void *func_ptr, const QVariantList &args)
 	return {QString::number(retCode), tmp1, tmp2, tmp3};
 }
 
+#if 1
+
 static QStringList i_F_i_str_i_str_str_i_str_str_str_str_i_str_i_pc_pc_(void *func_ptr, const QVariantList &args)
 {
-	using i_F_i_str_i_str_str_i_str_str_str_str_i_str_i_pc_pc = int (*)(int, const char *, int, const char *, const char *, int, const char *, const char *, const char *, const char *, int,
-																		const char *, int, char *, char *);
+	if (args.size() != 15)
+		throw std::runtime_error("args.size error");
+	using i_F_i_str_i_str_str_i_str_str_str_str_i_str_i_pc_pc = int (*)(int, const char *, int, const char *, const char *, int, const char *,
+																		const char *, const char *, const char *, int, const char *, int, char *,
+																		char *);
 
 	int arg1 = args[0].toInt();
 	const char *arg2 = tran(args[1]);
@@ -200,7 +237,8 @@ static QStringList i_F_i_str_i_str_str_i_str_str_str_str_i_str_i_pc_pc_(void *fu
 	int arg13 = args[12].toInt();
 	char *arg14 = tran(args[13]);
 	char *arg15 = tran(args[14]);
-	int retCode = (i_F_i_str_i_str_str_i_str_str_str_str_i_str_i_pc_pc(func_ptr))(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+	int retCode = (i_F_i_str_i_str_str_i_str_str_str_str_i_str_i_pc_pc(func_ptr))(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
+																				  arg12, arg13, arg14, arg15);
 
 	delete[] arg2;
 	delete[] arg4;
@@ -219,6 +257,8 @@ static QStringList i_F_i_str_i_str_str_i_str_str_str_str_i_str_i_pc_pc_(void *fu
 
 static QStringList i_F_i_i_i_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 3)
+		throw std::runtime_error("args.size error");
 	using i_F_i_i_i = int (*)(int, int, int);
 
 	int arg1 = args[0].toInt();
@@ -231,6 +271,8 @@ static QStringList i_F_i_i_i_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_i_str_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 2)
+		throw std::runtime_error("args.size error");
 	using i_F_i_str = int (*)(int, const char *);
 
 	int arg1 = args[0].toInt();
@@ -243,6 +285,8 @@ static QStringList i_F_i_str_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_i_str_str_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 3)
+		throw std::runtime_error("args.size error");
 	using i_F_i_str_str = int (*)(int, const char *, const char *);
 
 	int arg1 = args[0].toInt();
@@ -257,6 +301,8 @@ static QStringList i_F_i_str_str_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_i_i_i_i_str_str_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 6)
+		throw std::runtime_error("args.size error");
 	using i_F_i_i_i_i_str_str = int (*)(int, int, int, int, const char *, const char *);
 
 	int arg1 = args[0].toInt();
@@ -274,6 +320,8 @@ static QStringList i_F_i_i_i_i_str_str_(void *func_ptr, const QVariantList &args
 
 static QStringList i_F_i_str_str_i_pc_pc_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 6)
+		throw std::runtime_error("args.size error");
 	using i_F_i_str_str_i_pc_pc = int (*)(int, const char *, const char *, int, char *, char *);
 
 	int arg1 = args[0].toInt();
@@ -295,6 +343,8 @@ static QStringList i_F_i_str_str_i_pc_pc_(void *func_ptr, const QVariantList &ar
 
 static QStringList i_F_i_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 1)
+		throw std::runtime_error("args.size error");
 	using i_F_i = int (*)(int);
 
 	int arg1 = args[0].toInt();
@@ -305,6 +355,8 @@ static QStringList i_F_i_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_i_str_str_i_str_str_i_pc_pc_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 9)
+		throw std::runtime_error("args.size error");
 	using i_F_i_str_str_i_str_str_i_pc_pc = int (*)(int, const char *, const char *, int, const char *, const char *, int, char *, char *);
 
 	int arg1 = args[0].toInt();
@@ -331,6 +383,8 @@ static QStringList i_F_i_str_str_i_str_str_i_pc_pc_(void *func_ptr, const QVaria
 
 static QStringList i_F_i_pc_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 2)
+		throw std::runtime_error("args.size error");
 	using i_F_i_pc = int (*)(int, char *);
 
 	int arg1 = args[0].toInt();
@@ -344,6 +398,8 @@ static QStringList i_F_i_pc_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_i_pi_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 2)
+		throw std::runtime_error("args.size error");
 	using i_F_i_pi = int (*)(int, int *);
 
 	int arg1 = args[0].toInt();
@@ -357,6 +413,8 @@ static QStringList i_F_i_pi_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_i_i_str_pc_pc_pc_pc_pc_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 8)
+		throw std::runtime_error("args.size error");
 	using i_F_i_i_str_pc_pc_pc_pc_pc = int (*)(int, int, const char *, char *, char *, char *, char *, char *);
 
 	int arg1 = args[0].toInt();
@@ -385,6 +443,8 @@ static QStringList i_F_i_i_str_pc_pc_pc_pc_pc_(void *func_ptr, const QVariantLis
 
 static QStringList i_F_i_i_i_i_i_i_str_str_i_pc_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 10)
+		throw std::runtime_error("args.size error");
 	using i_F_i_i_i_i_i_i_str_str_i_pc = int (*)(int, int, int, int, int, int, const char *, const char *, int, char *);
 
 	int arg1 = args[0].toInt();
@@ -408,6 +468,8 @@ static QStringList i_F_i_i_i_i_i_i_str_str_i_pc_(void *func_ptr, const QVariantL
 
 static QStringList i_F_i_i_i_i_i_str_str_i_pc_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 9)
+		throw std::runtime_error("args.size error");
 	using i_F_i_i_i_i_i_str_str_i_pc = int (*)(int, int, int, int, int, const char *, const char *, int, char *);
 
 	int arg1 = args[0].toInt();
@@ -430,6 +492,8 @@ static QStringList i_F_i_i_i_i_i_str_str_i_pc_(void *func_ptr, const QVariantLis
 
 static QStringList i_F_i_str_str_i_str_i_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 6)
+		throw std::runtime_error("args.size error");
 	using i_F_i_str_str_i_str_i = int (*)(int, const char *, const char *, int, const char *, int);
 
 	int arg1 = args[0].toInt();
@@ -448,7 +512,10 @@ static QStringList i_F_i_str_str_i_str_i_(void *func_ptr, const QVariantList &ar
 
 static QStringList i_F_i_str_str_str_str_str_str_i_i_pc_(void *func_ptr, const QVariantList &args)
 {
-	using i_F_i_str_str_str_str_str_str_i_i_pc = int (*)(int, const char *, const char *, const char *, const char *, const char *, const char *, int, int, char *);
+	if (args.size() != 10)
+		throw std::runtime_error("args.size error");
+	using i_F_i_str_str_str_str_str_str_i_i_pc = int (*)(int, const char *, const char *, const char *, const char *, const char *, const char *, int,
+														 int, char *);
 
 	int arg1 = args[0].toInt();
 	const char *arg2 = tran(args[1]);
@@ -475,6 +542,8 @@ static QStringList i_F_i_str_str_str_str_str_str_i_i_pc_(void *func_ptr, const Q
 
 static QStringList i_F_i_i_i_str_str_pi_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 6)
+		throw std::runtime_error("args.size error");
 	using i_F_i_i_i_str_str_pi = int (*)(int, int, int, const char *, const char *, int *);
 
 	int arg1 = args[0].toInt();
@@ -494,6 +563,8 @@ static QStringList i_F_i_i_i_str_str_pi_(void *func_ptr, const QVariantList &arg
 
 static QStringList i_F_i_i_i_str_str_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 5)
+		throw std::runtime_error("args.size error");
 	using i_F_i_i_i_str_str = int (*)(int, int, int, const char *, const char *);
 
 	int arg1 = args[0].toInt();
@@ -510,6 +581,8 @@ static QStringList i_F_i_i_i_str_str_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_i_i_ustr_i_i_str_str_str_pc_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 9)
+		throw std::runtime_error("args.size error");
 	using i_F_i_i_ustr_i_i_str_str_str_pc = int (*)(int, int, const unsigned char *, int, int, const char *, const char *, const char *, char *);
 
 	int arg1 = args[0].toInt();
@@ -534,6 +607,8 @@ static QStringList i_F_i_i_ustr_i_i_str_str_str_pc_(void *func_ptr, const QVaria
 
 static QStringList i_F_i_pi_pc_pi_pc_pi_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 6)
+		throw std::runtime_error("args.size error");
 	using i_F_i_pi_pc_pi_pc_pi = int (*)(int, int *, char *, int *, char *, int *);
 
 	int arg1 = args[0].toInt();
@@ -559,6 +634,8 @@ static QStringList i_F_i_pi_pc_pi_pc_pi_(void *func_ptr, const QVariantList &arg
 
 static QStringList i_F_i_i_i_i_str_pc_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 6)
+		throw std::runtime_error("args.size error");
 	using i_F_i_i_i_i_str_pc = int (*)(int, int, int, int, const char *, char *);
 
 	int arg1 = args[0].toInt();
@@ -577,6 +654,8 @@ static QStringList i_F_i_i_i_i_str_pc_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_i_ustr_i_i_str_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 5)
+		throw std::runtime_error("args.size error");
 	using i_F_i_ustr_i_i_str = int (*)(int, const unsigned char *, int, int, const char *);
 
 	int arg1 = args[0].toInt();
@@ -593,6 +672,8 @@ static QStringList i_F_i_ustr_i_i_str_(void *func_ptr, const QVariantList &args)
 
 static QStringList i_F_i_ustr_i_i_i_i_i_i_i_pc_pi_pc_pi_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 13)
+		throw std::runtime_error("args.size error");
 	using i_F_i_ustr_i_i_i_i_i_i_i_pc_pi_pc_pi = int (*)(int, const unsigned char *, int, int, int, int, int, int, int, char *, int *, char *, int *);
 
 	int arg1 = args[0].toInt();
@@ -624,8 +705,11 @@ static QStringList i_F_i_ustr_i_i_i_i_i_i_i_pc_pi_pc_pi_(void *func_ptr, const Q
 
 static QStringList i_F_i_i_ustr_i_i_i_i_i_i_i_str_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc_(void *func_ptr, const QVariantList &args)
 {
-	using i_F_i_i_ustr_i_i_i_i_i_i_i_str_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc = int (*)(int, int, const unsigned char *, int, int, int, int, int, int, int, const char *, int *, char *, int *, char *, int *,
-																				 char *, int *, char *, int *, char *);
+	if (args.size() != 21)
+		throw std::runtime_error("args.size error");
+	using i_F_i_i_ustr_i_i_i_i_i_i_i_str_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc = int (*)(int, int, const unsigned char *, int, int, int, int, int, int, int,
+																				 const char *, int *, char *, int *, char *, int *, char *, int *,
+																				 char *, int *, char *);
 
 	int arg1 = args[0].toInt();
 	int arg2 = args[1].toInt();
@@ -648,7 +732,8 @@ static QStringList i_F_i_i_ustr_i_i_i_i_i_i_i_str_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc_
 	char *arg19 = tran(args[18]);
 	int *arg20 = new int(args[19].toInt());
 	char *arg21 = tran(args[20]);
-	int retCode = (i_F_i_i_ustr_i_i_i_i_i_i_i_str_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc(func_ptr))(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17,
+	int retCode = (i_F_i_i_ustr_i_i_i_i_i_i_i_str_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc(func_ptr))(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
+																						   arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17,
 																						   arg18, arg19, arg20, arg21);
 
 	delete[] arg3;
@@ -678,6 +763,8 @@ static QStringList i_F_i_i_ustr_i_i_i_i_i_i_i_str_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc_
 
 static QStringList i_F_i_ustr_i_i_i_i_i_i_i_(void *func_ptr, const QVariantList &args)
 {
+	if (args.size() != 9)
+		throw std::runtime_error("args.size error");
 	using i_F_i_ustr_i_i_i_i_i_i_i = int (*)(int, const unsigned char *, int, int, int, int, int, int, int);
 
 	int arg1 = args[0].toInt();
@@ -694,6 +781,8 @@ static QStringList i_F_i_ustr_i_i_i_i_i_i_i_(void *func_ptr, const QVariantList 
 	delete[] arg2;
 	return {QString::number(retCode)};
 }
+
+#endif
 // 29
 
 static const std::map<QString, func_type> func_map{
@@ -800,19 +889,10 @@ QString getRefType(const QString &type)
 
 #include <QTextCodec>
 
-QString utf8ToGbk(const QString &utf8String)
+QByteArray utf8ToGbk(const QString &str)
 {
-	QTextCodec *codec = QTextCodec::codecForName("GB18030");
-	if (codec)
-	{
-		QByteArray byteArray = codec->fromUnicode(utf8String);
-		return QString::fromLocal8Bit(byteArray);
-	}
-	else
-	{
-		// 处理编解码器未找到的情况
-		return {};
-	}
+    QTextCodec *gbk = QTextCodec::codecForName("GB18030");
+    return gbk->fromUnicode(str);
 }
 
 QString gbkToUtf8(const QString &gbkString)
@@ -830,6 +910,24 @@ QString gbkToUtf8(const QString &gbkString)
 	}
 }
 
+void toGbk(QVariant &item)
+{
+	if (item.type() == QVariant::Map)
+	{
+		auto tmp = utf8ToGbk(JsonToStr(item.toMap()));
+		item = tmp;	// StrToJson(tmp);这里不保存map了
+	}
+	else
+	{
+		item = utf8ToGbk(item.toString());
+	}
+}
+
+void toGbk(QVariantList &vList)
+{
+	for (auto &item : vList)
+		toGbk(item);
+}
 
 static QString declare_parsing(const QString &func_declare, QString &func_name, QStringList &func_paramList)
 {
@@ -897,9 +995,16 @@ void func_Data::display2table(QTableWidget *table) const
 	}
 }
 
-QStringList func_Data::call() const
+QStringList func_Data::call(bool isGBK) const
 {
-	return callFunc(typeRef, ptr, argsList);
+	if (isGBK)
+	{
+		QVariantList gbk_argsList = argsList;    // 这里不知道为什么，用初始化列表的方式得到的gbk_argsList为空
+		toGbk(gbk_argsList);
+		return callFunc(typeRef, ptr, gbk_argsList);
+	}
+	else
+		return callFunc(typeRef, ptr, argsList);
 }
 
 void func_Data::loadArgs(QTableWidget *table)
