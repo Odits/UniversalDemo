@@ -1,17 +1,70 @@
 {
-	"int testFunc1(int a1, int a2);": {
-		"args": [33, "66"]
-	},
-	"int testFunc2(int a1, char *a2, int a3);": {
-		"args": ["22", "OUT", "55"]
-	},
-	"void testFunc3(int a1, char *a2);": {
-		"args": [11, "test"]
-	},
-	"int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);": {
-		"args": [[256, {"中文gbk测试": "测试文本"}], [1024], [128], 15, 15]
-	},
-	"void gbkTest(int a1, const char *gbk)": {
-		"args": [1, {"中文gbk测试": "测试文本"}]
-	}
+    "int fileTest(int a1, const byte *a2, int a3, int a4, const char *a5)": {
+        "args": [
+            "1",
+            [
+                1024
+            ],
+            "1024",
+            "42",
+            [
+                64,
+                "test"
+            ]
+        ],
+        "file": [
+            {
+                "data": 1,
+                "len": 2,
+                "path": "./testFile2.txt"
+            },
+            {
+            }
+        ]
+    },
+    "int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeTimeout);": {
+        "args": [
+            [
+                256,
+                {
+                    "中文gbk测试": "测试文本"
+                }
+            ],
+            [
+                1024
+            ],
+            [
+                128
+            ],
+            15,
+            15
+        ]
+    },
+    "int testFunc1(int a1, int a2);": {
+        "args": [
+            "42",
+            "66"
+        ]
+    },
+    "int testFunc2(int a1, char *a2, int a3);": {
+        "args": [
+            "22",
+            "OUT",
+            "55"
+        ]
+    },
+    "void gbkTest(int a1, const char *gbk)": {
+        "args": [
+            1,
+            {
+                "中文gbk测试": "测试文本"
+            }
+        ]
+    },
+    "void testFunc3(int a1, char *a2);": {
+        "args": [
+            11,
+            "test"
+        ]
+    }
 }

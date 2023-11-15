@@ -24,7 +24,7 @@ class func_Data
 private:
 	QString declare, name, typeRef;
 	QStringList paramList;
-	QVariantList argsList;
+	QVariantList argsList, fileList;
 	void *ptr{};
 
 public:
@@ -43,6 +43,11 @@ public:
 	const QVariantList &getArgsList() const
 	{
 		return argsList;
+	}
+
+	const QVariantList &getfileList() const
+	{
+		return fileList;
 	}
 
 	const QStringList &getParamList() const
@@ -71,6 +76,8 @@ public:
 	{
 		this->ptr = func_ptr;
 	}
+
+	QVariantList loadFile() const;
 
 	QString call(bool isGBK = false) const;
 
@@ -160,10 +167,12 @@ public:
 	{
 		QJsonObject args;
 		args["args"] = QJsonArray::fromVariantList(func->getArgsList());
+		if (!func->getfileList().isEmpty())
+			args["file"] = QJsonArray::fromVariantList(func->getfileList());
 		return std::make_tuple(func->getDeclare(), args);
 	}
 
-	QString getDefParsing()
+	QString getDefParsing() const
 	{
 /*
 static QStringList i_F_pc_pc_pc_i_i_(void *func_ptr, const QVariantList &args)
@@ -233,7 +242,7 @@ static QStringList i_F_pc_pc_pc_i_i_(void *func_ptr, const QVariantList &args)
 			else if (paramType[i] == "uc")
 				parsing += "static_cast<unsigned char>(args[" + QString::number(i) + "].toChar());";
 			else if (paramType[i] == "puc" || paramType[i] == "ustr")
-				parsing += "reinterpret_cast<unsigned char *>(args[" + QString::number(i) + "].toByteArray().data());";
+				parsing += "reinterpret_cast<unsigned char *>(tran(args[" + QString::number(i) + "]));";
 			parsing += "\n\t";
 
 			call += "arg" + QString::number(i+1) + ", ";

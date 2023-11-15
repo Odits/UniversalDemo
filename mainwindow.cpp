@@ -373,10 +373,11 @@ void MainWindow::on_Save_triggered()
 		return on_SaveAs_triggered();
 	}
 
-	QString fileName = fileInfo.fileName();
-	QFile file(fileName);
+	QString filePath = fileInfo.absoluteFilePath();
+	QFile file(filePath);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
+		ui->result->append("打开" + filePath + "失败");
 		return;
 	}
 
@@ -385,6 +386,7 @@ void MainWindow::on_Save_triggered()
 	for (int i{0}; i < flowLayout->count(); i++)
 	{
 		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(i)->widget());
+		button->func_data()->loadArgs(ui->param_inputTable);
 		auto buttonObj = button->getJsonObj();
 		jsonObject[std::get<0>(buttonObj)] = std::get<1>(buttonObj);
 	}
@@ -393,24 +395,24 @@ void MainWindow::on_Save_triggered()
 	file.write(data);
 	file.close();
 
-	ui->result->append(fileName + "已保存");
+	ui->result->append(filePath + "已保存");
 }
 
 void MainWindow::on_SaveAs_triggered()
 {
-	QString fileName = QFileDialog::getSaveFileName(
+	QString filePath = QFileDialog::getSaveFileName(
 			this,
 			tr("save as Config."),
 			"./",
 			tr("Config(*.json);;All files(*.*)"));
 
-	if (fileName.isEmpty())
+	if (filePath.isEmpty())
 	{
 		QMessageBox::warning(this, "Warning!", "Failed to save this file!");
 		return;
 	}
 
-	QFile file(fileName);
+	QFile file(filePath);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
 		return;
@@ -429,7 +431,7 @@ void MainWindow::on_SaveAs_triggered()
 	file.write(data);
 	file.close();
 
-	ui->ConfigPath->setText(fileName);
+	ui->result->append(filePath + "已保存");
 }
 
 
@@ -485,16 +487,7 @@ void MainWindow::on_pB_Test3_clicked()
 	def_file.close();
 	ui->result->append("success, def_path=" + def_path);
 
-#else
-	for (int i{0}; i < flowLayout->count(); i++)
-	{
-		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(i)->widget());
-		button->isEnabled();
-		ui->result->append(button->func_data()->getTypeRef());
-	}
-
 #endif
-
-};
+}
 
 

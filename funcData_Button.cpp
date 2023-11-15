@@ -194,7 +194,6 @@ static QStringList i_F_i_pc_i_(void *func_ptr, const QVariantList &args)
 
 	int retCode = i_F_i_pc_i(func_ptr)(arg1, arg2, arg3);
 	QString tmp1{arg2};
-	qDebug() << __func__ << "tmp1=" << tmp1;
 	delete[] arg2;
 
 	return {QString::number(retCode), tmp1};
@@ -599,7 +598,7 @@ static QStringList i_F_i_i_ustr_i_i_str_str_str_pc_(void *func_ptr, const QVaria
 
 	int arg1 = args[0].toInt();
 	int arg2 = args[1].toInt();
-	const unsigned char *arg3 = reinterpret_cast<unsigned char *>(args[2].toByteArray().data());
+	const unsigned char *arg3 = reinterpret_cast<unsigned char *>(tran(args[2]));
 	int arg4 = args[3].toInt();
 	int arg5 = args[4].toInt();
 	const char *arg6 = tran(args[5]);
@@ -671,7 +670,7 @@ static QStringList i_F_i_ustr_i_i_str_(void *func_ptr, const QVariantList &args)
 	using i_F_i_ustr_i_i_str = int (*)(int, const unsigned char *, int, int, const char *);
 
 	int arg1 = args[0].toInt();
-	const unsigned char *arg2 = reinterpret_cast<unsigned char *>(args[1].toByteArray().data());
+	const unsigned char *arg2 = reinterpret_cast<unsigned char *>(tran(args[1]));
 	int arg3 = args[2].toInt();
 	int arg4 = args[3].toInt();
 	const char *arg5 = tran(args[4]);
@@ -689,7 +688,7 @@ static QStringList i_F_i_ustr_i_i_i_i_i_i_i_pc_pi_pc_pi_(void *func_ptr, const Q
 	using i_F_i_ustr_i_i_i_i_i_i_i_pc_pi_pc_pi = int (*)(int, const unsigned char *, int, int, int, int, int, int, int, char *, int *, char *, int *);
 
 	int arg1 = args[0].toInt();
-	const unsigned char *arg2 = reinterpret_cast<unsigned char *>(args[1].toByteArray().data());
+	const unsigned char *arg2 = reinterpret_cast<unsigned char *>(tran(args[1]));
 	int arg3 = args[2].toInt();
 	int arg4 = args[3].toInt();
 	int arg5 = args[4].toInt();
@@ -725,7 +724,7 @@ static QStringList i_F_i_i_ustr_i_i_i_i_i_i_i_str_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc_
 
 	int arg1 = args[0].toInt();
 	int arg2 = args[1].toInt();
-	const unsigned char *arg3 = reinterpret_cast<unsigned char *>(args[2].toByteArray().data());
+	const unsigned char *arg3 = reinterpret_cast<unsigned char *>(tran(args[2]));
 	int arg4 = args[3].toInt();
 	int arg5 = args[4].toInt();
 	int arg6 = args[5].toInt();
@@ -780,7 +779,7 @@ static QStringList i_F_i_ustr_i_i_i_i_i_i_i_(void *func_ptr, const QVariantList 
 	using i_F_i_ustr_i_i_i_i_i_i_i = int (*)(int, const unsigned char *, int, int, int, int, int, int, int);
 
 	int arg1 = args[0].toInt();
-	const unsigned char *arg2 = reinterpret_cast<unsigned char *>(args[1].toByteArray().data());
+	const unsigned char *arg2 = reinterpret_cast<unsigned char *>(tran(args[1]));
 	int arg3 = args[2].toInt();
 	int arg4 = args[3].toInt();
 	int arg5 = args[4].toInt();
@@ -958,23 +957,19 @@ void toGbk(QVariant &item)
 {
 	if (item.type() == QVariant::Map)
 	{
-		qDebug() << item;
 		auto tmp = utf8ToGbk(JsonToStr(item.toMap()));
 		item = tmp;    // StrToJson(tmp);这里不保存map了
-		qDebug() << item;
 	}
 	else if (item.type() == QVariant::List)
 	{
-		qDebug() << item;
 		if (item.toList().size() > 1)
 		{
 			auto tmp = item.toList();
 			toGbk(tmp[1]);    // 忽略[0]的大小参数，将[1]的字符串转为QByteArray
 			item = tmp;
 		}
-		qDebug() << item;
 	}
-	else
+	else if (item.type() != QVariant::ByteArray)
 	{
 		item = utf8ToGbk(item.toString());
 	}
@@ -1025,7 +1020,16 @@ static QString declare_parsing(const QString &func_declare, QString &func_name, 
 func_Data::func_Data(QString func_declare, const QJsonValue &func_argsList) : declare(std::move(func_declare))
 {
 	typeRef = declare_parsing(declare, name, paramList);
-	argsList = func_argsList.toObject()["args"].toArray().toVariantList();
+	const auto &obj = func_argsList.toObject();
+	if (obj.contains("args"))
+		argsList = obj["args"].toArray().toVariantList();
+	if (obj.contains("file"))
+	{
+		if (obj["file"].isArray())
+			fileList = obj["file"].toArray().toVariantList();
+		else if (obj["file"].isObject())
+			fileList.append(obj["file"].toObject().toVariantMap());
+	}
 }
 
 void func_Data::display2table(QTableWidget *table) const
@@ -1039,7 +1043,8 @@ void func_Data::display2table(QTableWidget *table) const
 	table->resizeColumnToContents(0);
 	table->setVerticalHeaderLabels(paramList);
 
-	for (int i{}; i < argsList.size(); i++)
+	// 参数展示
+	for (int i{0}; i < argsList.size(); i++)
 	{
 		QTableWidgetItem *item;
 		if (argsList[i].type() == QVariant::Map)
@@ -1050,24 +1055,62 @@ void func_Data::display2table(QTableWidget *table) const
 			item = new QTableWidgetItem(argsList[i].toString());
 		table->setItem(i, 0, item);
 	}
+
+	// 文件展示
+	for (int i{0}; i < fileList.size(); i++)
+	{
+		table->setRowCount(argsList.size() + i + 1);
+		table->setVerticalHeaderItem(table->rowCount() - 1, new QTableWidgetItem("file[" + QString::number(i) + "]"));
+		table->setItem(table->rowCount() - 1, 0, new QTableWidgetItem(JsonToStr(fileList.at(i).toMap())));
+	}
+
+	// 这里添加async的展示
 }
+
+QVariantList func_Data::loadFile() const
+{
+	QVariantList new_argsList = argsList;    // 这里不知道为什么，用初始化列表的方式得到的new_argsList为空
+	if (fileList.isEmpty())
+		return new_argsList;
+
+	for (const auto &file : fileList)
+	{
+		if (file.type() != QVariant::Map)
+			continue;
+		const auto &fileMap = file.toMap();
+		if (!fileMap.contains("path") || !fileMap.contains("data"))
+			continue;
+		int data_index{fileMap["data"].toInt()};
+
+		QFile qFile(fileMap["path"].toString());
+		if (qFile.open(QIODevice::ReadOnly))
+		{
+			QByteArray fileData = qFile.readAll();	// 读取文件的全部数据
+			new_argsList[data_index] = fileData;
+			if (fileMap.contains("len"))
+				new_argsList[fileMap["len"].toInt()] = fileData.size();
+
+			qFile.close();	// 关闭文件
+		}
+		else
+			throw std::runtime_error("Failed to open file.");	// 文件打开失败
+	}
+	return new_argsList;
+}
+
 
 QString func_Data::call(bool isGBK) const
 {
-	QStringList msgList;
+	QVariantList tmp_argsList = loadFile();
 	if (isGBK)
-	{
-		QVariantList gbk_argsList = argsList;    // 这里不知道为什么，用初始化列表的方式得到的gbk_argsList为空
-		toGbk(gbk_argsList);
-		msgList = callFunc(typeRef, ptr, gbk_argsList);
-	}
-	else
-		msgList = callFunc(typeRef, ptr, argsList);
+		toGbk(tmp_argsList);
+
+	QStringList msgList = callFunc(typeRef, ptr, tmp_argsList);
 
 	int index{0};
 	QString msg;
 	if (typeRef.at(0) != 'v')
-		msg += "\tretCode=" + msgList.at(index++);
+		msg += "  retCode=" + msgList.at(index++);
 	msg += "\n\t";
 	for (const auto &param : paramList)
 	{
@@ -1085,28 +1128,38 @@ void func_Data::loadArgs(QTableWidget *table)
 	if (getTableName(table) != name)
 		return;
 
+	int table_argsCount = table->rowCount() - fileList.size();
+
 	bool replace{false};
-	if (argsList.size() == table->rowCount())
-	{
+	if (argsList.size() == table_argsCount)
 		replace = true;
-	}
-	for (int var{}; var < table->rowCount(); var++)
+
+	for (int var{0}; var < table_argsCount; var++)
 	{
 		QString str = table->item(var, 0)->text();
-		auto first = str[0], last = str[str.length() - 1];
 		QVariant tmp{};
-		if (first == '{' && last == '}')
-			tmp = StrToJson(str);
-		else if (first == '[' && last == ']')
-			tmp = StrToJsonArray(str);
+		if (!str.isEmpty())
+		{
+			auto first = str[0], last = str[str.length() - 1];
+			if (first == '{' && last == '}')
+				tmp = StrToJson(str);
+			else if (first == '[' && last == ']')
+				tmp = StrToJsonArray(str);
+		}
 
-		if (tmp.isValid() || tmp.isNull())
+		if (tmp.isNull() || (tmp.toList().isEmpty() && tmp.toMap().isEmpty()))
 			tmp = str;
 
 		if (replace)
 			argsList[var] = tmp;
 		else
 			argsList.append(tmp);
+	}
+
+	for (int var{0}; var < fileList.size(); var++)
+	{
+		QString str = table->item(table_argsCount + var, 0)->text();
+		fileList[var] = StrToJson(str);
 	}
 }
 
