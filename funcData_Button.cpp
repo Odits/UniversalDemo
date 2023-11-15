@@ -119,9 +119,9 @@ static char *tran(const QVariant &var)
 	}
 	else if (var.type() == QVariant::Map)
 	{
-        auto str{JsonToStr(var.toMap()).toStdString()};
-        arg = new char[str.size() + 1]{};
-        strncpy(arg, str.c_str(), str.size());
+		auto str{JsonToStr(var.toMap()).toStdString()};
+		arg = new char[str.size() + 1]{};
+		strncpy(arg, str.c_str(), str.size());
 	}
 	else if (var.type() == QVariant::ByteArray)
 	{
@@ -194,7 +194,7 @@ static QStringList i_F_i_pc_i_(void *func_ptr, const QVariantList &args)
 
 	int retCode = i_F_i_pc_i(func_ptr)(arg1, arg2, arg3);
 	QString tmp1{arg2};
-	qDebug() << __func__ << "tmp1="<< tmp1;
+	qDebug() << __func__ << "tmp1=" << tmp1;
 	delete[] arg2;
 
 	return {QString::number(retCode), tmp1};
@@ -834,7 +834,7 @@ bool check_funcList(const QString &func)
 	return func_map.count(func);
 }
 
-#if 0	//test
+#if 0    //test
 struct args{
 	int arg1;
 	char* arg2;
@@ -935,8 +935,8 @@ QString getRefType(const QString &type)
 
 QByteArray utf8ToGbk(const QString &str)
 {
-    QTextCodec *gbk = QTextCodec::codecForName("GB18030");
-    return gbk->fromUnicode(str);
+	QTextCodec *gbk = QTextCodec::codecForName("GB18030");
+	return gbk->fromUnicode(str);
 }
 
 QString gbkToUtf8(const QString &gbkString)
@@ -960,7 +960,7 @@ void toGbk(QVariant &item)
 	{
 		qDebug() << item;
 		auto tmp = utf8ToGbk(JsonToStr(item.toMap()));
-		item = tmp;	// StrToJson(tmp);这里不保存map了
+		item = tmp;    // StrToJson(tmp);这里不保存map了
 		qDebug() << item;
 	}
 	else if (item.type() == QVariant::List)
@@ -1052,16 +1052,30 @@ void func_Data::display2table(QTableWidget *table) const
 	}
 }
 
-QStringList func_Data::call(bool isGBK) const
+QString func_Data::call(bool isGBK) const
 {
+	QStringList msgList;
 	if (isGBK)
 	{
 		QVariantList gbk_argsList = argsList;    // 这里不知道为什么，用初始化列表的方式得到的gbk_argsList为空
 		toGbk(gbk_argsList);
-		return callFunc(typeRef, ptr, gbk_argsList);
+		msgList = callFunc(typeRef, ptr, gbk_argsList);
 	}
 	else
-		return callFunc(typeRef, ptr, argsList);
+		msgList = callFunc(typeRef, ptr, argsList);
+
+	int index{0};
+	QString msg;
+	if (typeRef.at(0) != 'v')
+		msg += "\tretCode=" + msgList.at(index++);
+	msg += "\n\t";
+	for (const auto &param : paramList)
+	{
+		int p = param.indexOf('*');
+		if (p != -1 && param.indexOf("const") == -1)
+			msg += param.mid(p + 1) + "=" + msgList.at(index++) + "\n\t";
+	}
+	return msg;
 }
 
 void func_Data::loadArgs(QTableWidget *table)
@@ -1080,12 +1094,13 @@ void func_Data::loadArgs(QTableWidget *table)
 	{
 		QString str = table->item(var, 0)->text();
 		auto first = str[0], last = str[str.length() - 1];
-		QVariant tmp;
+		QVariant tmp{};
 		if (first == '{' && last == '}')
 			tmp = StrToJson(str);
 		else if (first == '[' && last == ']')
 			tmp = StrToJsonArray(str);
-		else
+
+		if (tmp.isValid() || tmp.isNull())
 			tmp = str;
 
 		if (replace)

@@ -324,12 +324,7 @@ void MainWindow::on_pB_LOAD_clicked()
 			func->loadArgs(ui->param_inputTable);
 			try
 			{
-				auto msgList = func->call(ui->oeGBK->isChecked());
-//				qDebug() << msgList;
-				for (const auto &resp : msgList)
-				{
-					msg += " msgList=" + resp;
-				}
+				msg += func->call(ui->oeGBK->isChecked());
 			} catch (std::exception &e)
 			{
 				msg += " fail: ";

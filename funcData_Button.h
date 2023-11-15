@@ -72,7 +72,7 @@ public:
 		this->ptr = func_ptr;
 	}
 
-	QStringList call(bool isGBK = false) const;
+	QString call(bool isGBK = false) const;
 
 	void loadArgs(QTableWidget *table);
 };
