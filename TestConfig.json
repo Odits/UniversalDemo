@@ -17,8 +17,6 @@
                 "data": 1,
                 "len": 2,
                 "path": "./testFile2.txt"
-            },
-            {
             }
         ]
     },
@@ -65,6 +63,12 @@
         "args": [
             11,
             "test"
+        ]
+    },
+    "int piTest(int a1, int *a2);": {
+        "args": [
+            11,
+            42
         ]
     }
 }

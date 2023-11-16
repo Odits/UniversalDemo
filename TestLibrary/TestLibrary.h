@@ -17,6 +17,9 @@ int jsonTest(char *args, char *resmsg, char *errmsg, int readTimeout, int writeT
 void gbkTest(int a1, const char *gbk);
 
 int fileTest(int a1, const byte *a2, int a3, int a4, const char *a5);
+
+// i_F_i_pi_
+int piTest(int a1, int *a2);
 }
 
 #endif // TESTLIBRARY_H

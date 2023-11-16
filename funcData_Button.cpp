@@ -572,6 +572,27 @@ static QStringList i_F_i_i_i_str_str_pi_(void *func_ptr, const QVariantList &arg
 	return {QString::number(retCode), tmp1};
 }
 
+static QStringList i_F_i_i_i_str_str_pc_(void *func_ptr, const QVariantList &args)
+{
+	if (args.size() != 6)
+		throw std::runtime_error("args.size error");
+	using i_F_i_i_i_str_str_pc = int (*)(int, int, int, const char *, const char *, char *);
+
+	int arg1 = args[0].toInt();
+	int arg2 = args[1].toInt();
+	int arg3 = args[2].toInt();
+	const char *arg4 = tran(args[3]);
+	const char *arg5 = tran(args[4]);
+	char *arg6 = tran(args[5]);
+	int retCode = (i_F_i_i_i_str_str_pc(func_ptr))(arg1, arg2, arg3, arg4, arg5, arg6);
+
+	delete[] arg4;
+	delete[] arg5;
+	QString tmp1{arg6};
+	delete[] arg6;
+	return {QString::number(retCode), tmp1};
+}
+
 static QStringList i_F_i_i_i_str_str_(void *func_ptr, const QVariantList &args)
 {
 	if (args.size() != 5)
@@ -716,6 +737,7 @@ static QStringList i_F_i_ustr_i_i_i_i_i_i_i_pc_pi_pc_pi_(void *func_ptr, const Q
 
 static QStringList i_F_i_i_ustr_i_i_i_i_i_i_i_str_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc_(void *func_ptr, const QVariantList &args)
 {
+	qDebug() << args.size();
 	if (args.size() != 21)
 		throw std::runtime_error("args.size error");
 	using i_F_i_i_ustr_i_i_i_i_i_i_i_str_pi_pc_pi_pc_pi_pc_pi_pc_pi_pc = int (*)(int, int, const unsigned char *, int, int, int, int, int, int, int,
@@ -818,6 +840,7 @@ static const std::map<QString, func_type> func_map{
 		{"i_F_i_str_str_i_str_i",                                        i_F_i_str_str_i_str_i_},
 		{"i_F_i_str_str_str_str_str_str_i_i_pc",                         i_F_i_str_str_str_str_str_str_i_i_pc_},
 		{"i_F_i_i_i_str_str_pi",                                         i_F_i_i_i_str_str_pi_},
+		{"i_F_i_i_i_str_str_pc",                                         i_F_i_i_i_str_str_pc_},
 		{"i_F_i_i_i_str_str",                                            i_F_i_i_i_str_str_},
 		{"i_F_i_i_ustr_i_i_str_str_str_pc",                              i_F_i_i_ustr_i_i_str_str_str_pc_},
 		{"i_F_i_pi_pc_pi_pc_pi",                                         i_F_i_pi_pc_pi_pc_pi_},
@@ -1059,7 +1082,7 @@ void func_Data::display2table(QTableWidget *table) const
 	// 文件展示
 	for (int i{0}; i < fileList.size(); i++)
 	{
-		table->setRowCount(argsList.size() + i + 1);
+		table->setRowCount(paramList.size() + i + 1);
 		table->setVerticalHeaderItem(table->rowCount() - 1, new QTableWidgetItem("file[" + QString::number(i) + "]"));
 		table->setItem(table->rowCount() - 1, 0, new QTableWidgetItem(JsonToStr(fileList.at(i).toMap())));
 	}
@@ -1085,15 +1108,15 @@ QVariantList func_Data::loadFile() const
 		QFile qFile(fileMap["path"].toString());
 		if (qFile.open(QIODevice::ReadOnly))
 		{
-			QByteArray fileData = qFile.readAll();	// 读取文件的全部数据
+			QByteArray fileData = qFile.readAll();    // 读取文件的全部数据
 			new_argsList[data_index] = fileData;
 			if (fileMap.contains("len"))
 				new_argsList[fileMap["len"].toInt()] = fileData.size();
 
-			qFile.close();	// 关闭文件
+			qFile.close();    // 关闭文件
 		}
 		else
-			throw std::runtime_error("Failed to open file.");	// 文件打开失败
+			throw std::runtime_error("Failed to open file.");    // 文件打开失败
 	}
 	return new_argsList;
 }
@@ -1111,13 +1134,13 @@ QString func_Data::call(bool isGBK) const
 	QString msg;
 	if (typeRef.at(0) != 'v')
 		msg += "  retCode=" + msgList.at(index++);
-	msg += "\n\t";
 	for (const auto &param : paramList)
 	{
 		int p = param.indexOf('*');
 		if (p != -1 && param.indexOf("const") == -1)
-			msg += param.mid(p + 1) + "=" + msgList.at(index++) + "\n\t";
+			msg += "\n\t" + param.mid(p + 1) + "=" + msgList.at(index++);
 	}
+	msg += "\n";
 	return msg;
 }
 

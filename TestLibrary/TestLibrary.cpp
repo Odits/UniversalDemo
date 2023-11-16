@@ -115,9 +115,15 @@ int fileTest(int a1, const byte *a2, int a3, int a4, const char *a5)
 }
 
 
+int piTest(int a1, int *a2)
+{
+	std::cout << "Enter " << __func__ << "\n";
+	std::cout << "a1=" << a1 << ", a2=" << *a2 << std::endl;
 
+	*a2 = a1 + 42;
 
-
+	return 42;
+}
 
 
 

@@ -72,11 +72,13 @@ MainWindow::~MainWindow()
 void MainWindow::on_oeUTF8_triggered()
 {
 	ui->oeGBK->setChecked(false);
+	ui->result->append("输出编码设置为UTF-8");
 }
 
 void MainWindow::on_oeGBK_triggered()
 {
 	ui->oeUTF8->setChecked(false);
+	ui->result->append("输出编码设置为GB18030");
 }
 
 void MainWindow::on_reUTF8_triggered()
@@ -299,6 +301,12 @@ void MainWindow::on_pB_LOAD_clicked()
 	for (const auto &key : configs.keys())
 	{
 //		ui->result->append(key + ":" + printJson(configs[key]));
+		if (key == "Output Encode")
+		{
+			const auto &value = configs[key].toString();
+			if (value.compare("GBK", Qt::CaseInsensitive) || value.compare("GB18030", Qt::CaseInsensitive))
+				this->on_oeGBK_triggered();
+		}
 
 		auto *newPB = new funcData_Button(key, configs[key], this);
 		newPB->autoResize();
@@ -475,7 +483,7 @@ void MainWindow::on_pB_Test3_clicked()
 	for (int i{0}; i < flowLayout->count(); i++)
 	{
 		auto *button = qobject_cast<funcData_Button *>(flowLayout->itemAt(i)->widget());
-//		if (!button->isEnabled())
+		if (!button->isEnabled())
 		{
 			def_file.write(button->getDefParsing().toLocal8Bit());
 
