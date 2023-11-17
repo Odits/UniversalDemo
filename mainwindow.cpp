@@ -38,14 +38,19 @@ MainWindow::MainWindow(QWidget *parent)
 
 	ui->oeUTF8->setChecked(true);
 	ui->reUTF8->setChecked(true);
+
+	ui->result->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->result, &QTextBrowser::customContextMenuRequested, [this](const QPoint &pos) {
+		showContextMenu(pos, ui->result);
+	});
 }
 
-void MainWindow::setLibrary(const QString& path)
+void MainWindow::setLibrary(const QString &path)
 {
 	ui->LibraryPath->setText(path);
 }
 
-void MainWindow::setConfig(const QString& path)
+void MainWindow::setConfig(const QString &path)
 {
 	ui->ConfigPath->setText(path);
 }
